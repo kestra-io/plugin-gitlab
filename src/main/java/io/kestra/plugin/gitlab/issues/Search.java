@@ -72,7 +72,7 @@ public class Search extends AbstractGitLabTask implements RunnableTask<Search.Ou
                 String rSearch = runContext.render(this.search).as(String.class).orElseThrow();
                 params.add("search=" + URLEncoder.encode(rSearch, StandardCharsets.UTF_8));
             }
-            String renderedState = runContext.render(this.state).as(String.class).orElseThrow();
+            String renderedState = runContext.render(this.state).as(String.class).orElse("opened");
             params.add("state=" + renderedState);
             if (this.labels != null) {
                 List<String> renderedLabels = runContext.render(this.labels).asList(String.class);
