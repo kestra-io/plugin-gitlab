@@ -38,7 +38,7 @@ import java.util.Map;
             tasks:
               - id: create_merge_request
                 type: io.kestra.plugin.gitlab.MergeRequest
-                url: https://gitlab.com
+                url: https://gitlab.example.com
                 token: "{{ secret('GITLAB_TOKEN') }}"
                 projectId: "123"
                 title: "Feature: Add new functionality"
