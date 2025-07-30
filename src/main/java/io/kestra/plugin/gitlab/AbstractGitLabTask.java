@@ -23,7 +23,7 @@ public abstract class AbstractGitLabTask extends Task {
 
     @Schema(title = "GitLab URL", description = "GitLab URL")
     @Builder.Default
-    private Property<String> url = Property.of("https://gitlab.com");
+    private Property<String> url = Property.ofValue("https://gitlab.com");
 
     @Schema(title = "Personal Access Token", description = "GitLab Personal Access Token")
     @NotNull
@@ -35,7 +35,7 @@ public abstract class AbstractGitLabTask extends Task {
 
     @Schema(title = "API Path", description = "Custom API path for GitLab API endpoints")
     @Builder.Default
-    private Property<String> apiPath = Property.of("/api/v4/projects");
+    private Property<String> apiPath = Property.ofValue("/api/v4/projects");
 
     protected HttpClient httpClient(RunContext runContext) throws IllegalVariableEvaluationException {
 

@@ -57,7 +57,7 @@ public class Search extends AbstractGitLabTask implements RunnableTask<Search.Ou
 
     @Schema(title = "Issue state", description = "opened, closed or all")
     @Builder.Default
-    private Property<String> state = Property.of("opened");
+    private Property<String> state = Property.ofValue("opened");
 
     @Schema(title = "Labels to filter by")
     private Property<List<String>> labels;
