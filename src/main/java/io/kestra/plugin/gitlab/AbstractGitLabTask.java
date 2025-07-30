@@ -54,7 +54,7 @@ public abstract class AbstractGitLabTask extends Task {
     }
 
     protected String buildApiEndpoint(String resource, RunContext runContext) throws IllegalVariableEvaluationException {
-        String renderedApiPath = runContext.render(this.apiPath).as(String.class).orElseThrow();
+        String renderedApiPath = runContext.render(this.apiPath).as(String.class).orElse("/api/v4/projects");
         String renderedProjectId = runContext.render(this.getProjectId()).as(String.class).orElseThrow();
         return renderedApiPath + "/" + renderedProjectId + "/" + resource;
     }
