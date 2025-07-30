@@ -44,7 +44,7 @@ public abstract class AbstractGitLabTask extends Task {
     }
 
     protected HttpRequest.HttpRequestBuilder authenticatedRequestBuilder(String endpoint, RunContext runContext) throws IllegalVariableEvaluationException {
-        String baseUrl = runContext.render(this.url).as(String.class).orElseThrow();
+        String baseUrl = runContext.render(this.url).as(String.class).orElse("https://gitlab.com");
         String renderedToken = runContext.render(this.token).as(String.class).orElseThrow();
         String fullUrl = baseUrl + endpoint;
         return HttpRequest.builder()
