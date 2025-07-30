@@ -174,7 +174,7 @@ jar {
         attributes(
             "X-Kestra-Name": project.name,
             "X-Kestra-Title": "GitLab",
-            "X-Kestra-Group": project.group + ".templates",
+            "X-Kestra-Group": project.group + ".gitlab",
             "X-Kestra-Description": project.description,
             "X-Kestra-Version": project.version
         )
