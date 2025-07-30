@@ -67,23 +67,16 @@ public class MergeRequest extends AbstractGitLabTask implements RunnableTask<Mer
 
     @Override
     public Output run(RunContext runContext) throws Exception {
-
         try (HttpClient client = httpClient(runContext)) {
 
             Map<String, Object> body = new HashMap<>();
 
             // Required fields for  merge request creation
-            if(this.title != null) {
-                body.put("title", runContext.render(this.title).as(String.class).orElseThrow());
-            }
+            body.put("title", runContext.render(this.title).as(String.class).orElseThrow());
 
-            if(this.sourceBranch != null) {
-                body.put("source_branch", runContext.render(this.sourceBranch).as(String.class).orElseThrow());
-            }
+            body.put("source_branch", runContext.render(this.sourceBranch).as(String.class).orElseThrow());
 
-            if(this.targetBranch != null) {
-                body.put("target_branch", runContext.render(this.targetBranch).as(String.class).orElseThrow());
-            }
+            body.put("target_branch", runContext.render(this.targetBranch).as(String.class).orElseThrow());
 
             // Optional fields
             if (this.mergeRequestDescription != null) {
@@ -96,11 +89,10 @@ public class MergeRequest extends AbstractGitLabTask implements RunnableTask<Mer
 
             HttpRequest request = authenticatedRequestBuilder(endpoint, runContext)
                 .method("POST")
-                .body(new HttpRequest.StringRequestBody("application/json",StandardCharsets.UTF_8,jsonBody))
+                .body(new HttpRequest.StringRequestBody("application/json", StandardCharsets.UTF_8, jsonBody))
                 .build();
 
             HttpResponse<Map> response = client.request(request, Map.class);
-
             Map<String, Object> result = response.getBody();
 
             return Output.builder()
@@ -110,7 +102,6 @@ public class MergeRequest extends AbstractGitLabTask implements RunnableTask<Mer
                 .build();
         }
     }
-
 
     @Builder
     @Getter

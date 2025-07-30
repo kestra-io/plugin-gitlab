@@ -38,8 +38,8 @@ import java.util.Map;
 
             tasks:
               - id: search_issues
-                type: io.kestra.plugin.gitlab.issues.SearchIssues
-                url: https://gitlab.com
+                type: io.kestra.plugin.gitlab.issues.Search
+                url: https://gitlab.example.com
                 token: "{{ secret('GITLAB_TOKEN') }}"
                 projectId: "123"
                 search: "bug"
@@ -62,29 +62,25 @@ public class Search extends AbstractGitLabTask implements RunnableTask<Search.Ou
     @Schema(title = "Labels to filter by")
     private Property<List<String>> labels;
 
-
     @Override
     public Output run(RunContext runContext) throws Exception {
-
         try (HttpClient client = httpClient(runContext)) {
 
             // Build the query params
             List<String> params = new ArrayList<>();
-            if(this.search != null){
-                String renderedSearch = runContext.render(this.search).as(String.class).orElseThrow();
-                params.add("search="+ URLEncoder.encode(renderedSearch, StandardCharsets.UTF_8));
+            if (this.search != null) {
+                String rSearch = runContext.render(this.search).as(String.class).orElseThrow();
+                params.add("search=" + URLEncoder.encode(rSearch, StandardCharsets.UTF_8));
             }
-
             String renderedState = runContext.render(this.state).as(String.class).orElseThrow();
             params.add("state=" + renderedState);
-
-            if(this.labels != null) {
+            if (this.labels != null) {
                 List<String> renderedLabels = runContext.render(this.labels).asList(String.class);
                 String labelStr = String.join(",", renderedLabels);
-                params.add("labels="+ URLEncoder.encode(labelStr, StandardCharsets.UTF_8));
+                params.add("labels=" + URLEncoder.encode(labelStr, StandardCharsets.UTF_8));
             }
 
-            String queryStr = "?" + String.join("&",params);
+            String queryStr = "?" + String.join("&", params);
             String endpoint = buildApiEndpoint("issues", runContext) + queryStr;
 
             // Create GET request
@@ -92,9 +88,7 @@ public class Search extends AbstractGitLabTask implements RunnableTask<Search.Ou
                 .method("GET")
                 .build();
 
-
             HttpResponse<List> response = client.request(request, List.class);
-
             List<Map<String, Object>> issues = response.getBody();
 
             return Output.builder()

@@ -19,6 +19,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 @SuperBuilder
 @ToString
 @EqualsAndHashCode
@@ -38,8 +39,8 @@ import java.util.Map;
 
             tasks:
               - id: create_issue
-                type: io.kestra.plugin.gitlab.issues.CreateIssue
-                url: https://gitlab.com
+                type: io.kestra.plugin.gitlab.issues.Create
+                url: https://gitlab.example.com
                 token: "{{ secret('GITLAB_TOKEN') }}"
                 projectId: "123"
                 title: "Bug report"
@@ -58,7 +59,7 @@ import java.util.Map;
 
             tasks:
               - id: create_issue
-                type: io.kestra.plugin.gitlab.issues.CreateIssue
+                type: io.kestra.plugin.gitlab.issues.Create
                 url: https://gitlab.example.com
                 apiPath: /api/v4/projects
                 token: "{{ secret('GITLAB_TOKEN') }}"
@@ -82,7 +83,6 @@ public class Create extends AbstractGitLabTask implements RunnableTask<Create.Ou
 
     @Override
     public Output run(RunContext runContext) throws Exception {
-
         try (HttpClient client = httpClient(runContext)) {
 
             Map<String, Object> body = new HashMap<>();
@@ -94,14 +94,11 @@ public class Create extends AbstractGitLabTask implements RunnableTask<Create.Ou
                 List<String> renderedLabels = runContext.render(this.labels).asList(String.class);
                 body.put("labels", renderedLabels);
             }
-
             ObjectMapper mapper = new ObjectMapper();
             String jsonBody = mapper.writeValueAsString(body);
-
-
             String endpoint = buildApiEndpoint("issues", runContext);
 
-            HttpRequest request = authenticatedRequestBuilder(endpoint,runContext)
+            HttpRequest request = authenticatedRequestBuilder(endpoint, runContext)
                 .method("POST")
                 .body(new HttpRequest.StringRequestBody("application/json",
                     StandardCharsets.UTF_8,
@@ -110,7 +107,7 @@ public class Create extends AbstractGitLabTask implements RunnableTask<Create.Ou
 
             HttpResponse<Map> response = client.request(request, Map.class);
 
-            Map<String, Object>  result = response.getBody();
+            Map<String, Object> result = response.getBody();
 
             return Output.builder()
                 .issueId(result.get("id").toString())

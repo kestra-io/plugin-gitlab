@@ -14,7 +14,6 @@ import lombok.experimental.SuperBuilder;
 
 import java.net.URI;
 
-
 @SuperBuilder
 @ToString
 @EqualsAndHashCode
@@ -24,7 +23,7 @@ public abstract class AbstractGitLabTask extends Task {
 
     @Schema(title = "GitLab URL", description = "GitLab URL")
     @Builder.Default
-    private Property<String> url = Property.of( "https://gitlab.com");
+    private Property<String> url = Property.of("https://gitlab.com");
 
     @Schema(title = "Personal Access Token", description = "GitLab Personal Access Token")
     @NotNull
@@ -41,16 +40,13 @@ public abstract class AbstractGitLabTask extends Task {
     protected HttpClient httpClient(RunContext runContext) throws IllegalVariableEvaluationException {
 
         HttpConfiguration config = null;
-
-        return  new HttpClient(runContext, config);
+        return new HttpClient(runContext, config);
     }
 
-    protected HttpRequest.HttpRequestBuilder authenticatedRequestBuilder(String endpoint, RunContext runContext) throws IllegalVariableEvaluationException{
+    protected HttpRequest.HttpRequestBuilder authenticatedRequestBuilder(String endpoint, RunContext runContext) throws IllegalVariableEvaluationException {
         String baseUrl = runContext.render(this.url).as(String.class).orElseThrow();
         String renderedToken = runContext.render(this.token).as(String.class).orElseThrow();
-
         String fullUrl = baseUrl + endpoint;
-
         return HttpRequest.builder()
             .uri(URI.create(fullUrl))
             .addHeader("PRIVATE-TOKEN", renderedToken)
