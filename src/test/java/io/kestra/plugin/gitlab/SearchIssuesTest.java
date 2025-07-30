@@ -2,9 +2,10 @@
 package io.kestra.plugin.gitlab;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.kestra.core.models.property.Property;
 import io.kestra.core.runners.RunContext;
 import io.kestra.core.runners.RunContextFactory;
-import io.kestra.plugin.gitlab.issues.SearchIssues;
+import io.kestra.plugin.gitlab.issues.Search;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
 
@@ -29,17 +30,17 @@ public class SearchIssuesTest extends WireMockTest {
                 .withBody("[{\"id\":1,\"iid\":1,\"project_id\":12345,\"title\":\"Test issue\",\"web_url\":\"https://gitlab.example.com/test-group/test-project/issues/1\"}]")
             ));
 
-        SearchIssues task = SearchIssues.builder()
+        Search task = Search.builder()
             .id("search-issues")
-            .projectId("12345")
-            .token("test-token")
-            .url(wireMock.baseUrl())
-            .search("Test issue")
+            .projectId(Property.of("12345"))
+            .token(Property.of("test-token"))
+            .url(Property.of(wireMock.baseUrl()))
+            .search(Property.of("Test issue"))
             .build();
 
         RunContext runContext = runContextFactory.of();
 
-        SearchIssues.Output runOutput = task.run(runContext);
+        Search.Output runOutput = task.run(runContext);
 
         assertThat(runOutput.getCount(), is(1));
         assertThat(runOutput.getIssues(), is(notNullValue()));
@@ -54,18 +55,18 @@ public class SearchIssuesTest extends WireMockTest {
                 .withBody("[{\"id\":1,\"iid\":1,\"project_id\":12345,\"title\":\"Test issue\",\"web_url\":\"https://gitlab.example.com/test-group/test-project/issues/1\"}]")
             ));
 
-        SearchIssues task = SearchIssues.builder()
+        Search task = Search.builder()
             .id("search-issues")
-            .projectId("12345")
-            .token("test-token")
-            .url(wireMock.baseUrl())
-            .search("Test issue")
-            .state("closed")
+            .projectId(Property.of("12345"))
+            .token(Property.of("test-token"))
+            .url(Property.of(wireMock.baseUrl()))
+            .search(Property.of("Test issue"))
+            .state(Property.of("closed"))
             .build();
 
         RunContext runContext = runContextFactory.of();
 
-        SearchIssues.Output runOutput = task.run(runContext);
+        Search.Output runOutput = task.run(runContext);
 
         assertThat(runOutput.getCount(), is(1));
         assertThat(runOutput.getIssues(), is(notNullValue()));
@@ -77,12 +78,12 @@ public class SearchIssuesTest extends WireMockTest {
         wireMock.stubFor(get(urlEqualTo("/api/v4/projects/54321/issues?search=Test+issue&state=opened"))
             .willReturn(notFound()));
 
-        SearchIssues task = SearchIssues.builder()
+        Search task = Search.builder()
             .id("search-issues")
-            .projectId("54321")
-            .token("test-token")
-            .url(wireMock.baseUrl())
-            .search("Test issue")
+            .projectId(Property.of("54321"))
+            .token(Property.of("test-token"))
+            .url(Property.of(wireMock.baseUrl()))
+            .search(Property.of("Test issue"))
             .build();
 
         RunContext runContext = runContextFactory.of();

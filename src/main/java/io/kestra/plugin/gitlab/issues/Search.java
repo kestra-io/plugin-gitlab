@@ -5,7 +5,7 @@ import io.kestra.core.http.HttpResponse;
 import io.kestra.core.http.client.HttpClient;
 import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Plugin;
-import io.kestra.core.models.annotations.PluginProperty;
+import io.kestra.core.models.property.Property;
 import io.kestra.core.models.tasks.RunnableTask;
 import io.kestra.core.runners.RunContext;
 import io.kestra.plugin.gitlab.AbstractGitLabTask;
@@ -30,7 +30,7 @@ import java.util.Map;
 )
 @Plugin(examples = {
     @Example(
-        title = "Search for issues in a GitLab project using a [project access token](https://docs.gitlab.com/ee/user/project/settings/project_access_tokens.html).",
+        title = "Search for issues in a GitLab project using a project access token.",
         full = true,
         code = """
             id: gitlab_search_issues
@@ -44,24 +44,23 @@ import java.util.Map;
                 projectId: "123"
                 search: "bug"
                 state: "opened"
-                labels: ["bug", "critical"]
+                labels:
+                  - bug
+                  - critical
             """
     )
 })
-public class SearchIssues extends AbstractGitLabTask implements RunnableTask<SearchIssues.Output> {
+public class Search extends AbstractGitLabTask implements RunnableTask<Search.Output> {
 
     @Schema(title = "Search query")
-    @PluginProperty(dynamic = true)
-    private String search;
+    private Property<String> search;
 
     @Schema(title = "Issue state", description = "opened, closed or all")
-    @PluginProperty(dynamic = true)
     @Builder.Default
-    private  String state = "opened";
+    private Property<String> state = Property.of("opened");
 
     @Schema(title = "Labels to filter by")
-    @PluginProperty(dynamic = true)
-    private List<String> labels;
+    private Property<List<String>> labels;
 
 
     @Override
@@ -72,18 +71,21 @@ public class SearchIssues extends AbstractGitLabTask implements RunnableTask<Sea
             // Build the query params
             List<String> params = new ArrayList<>();
             if(this.search != null){
-                params.add("search="+ URLEncoder.encode(runContext.render(this.search), StandardCharsets.UTF_8));
+                String renderedSearch = runContext.render(this.search).as(String.class).orElseThrow();
+                params.add("search="+ URLEncoder.encode(renderedSearch, StandardCharsets.UTF_8));
             }
 
-            params.add("state=" + runContext.render(this.state));
+            String renderedState = runContext.render(this.state).as(String.class).orElseThrow();
+            params.add("state=" + renderedState);
 
             if(this.labels != null) {
-                String labelStr = String.join(",", runContext.render(this.labels));
-                params.add("labels="+ URLEncoder.encode(runContext.render(labelStr),StandardCharsets.UTF_8));
+                List<String> renderedLabels = runContext.render(this.labels).asList(String.class);
+                String labelStr = String.join(",", renderedLabels);
+                params.add("labels="+ URLEncoder.encode(labelStr, StandardCharsets.UTF_8));
             }
 
             String queryStr = "?" + String.join("&",params);
-            String endpoint = "/api/v4/projects/" + runContext.render(this.getProjectId()) + "/issues" + queryStr;
+            String endpoint = buildApiEndpoint("issues", runContext) + queryStr;
 
             // Create GET request
             HttpRequest request = authenticatedRequestBuilder(endpoint, runContext)
@@ -100,8 +102,6 @@ public class SearchIssues extends AbstractGitLabTask implements RunnableTask<Sea
                 .count(issues.size())
                 .statusCode(response.getStatus().getCode())
                 .build();
-
-
         }
     }
 

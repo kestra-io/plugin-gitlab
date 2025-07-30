@@ -1,6 +1,7 @@
 package io.kestra.plugin.gitlab;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.kestra.core.models.property.Property;
 import io.kestra.core.runners.RunContext;
 import io.kestra.core.runners.RunContextFactory;
 import jakarta.inject.Inject;
@@ -31,13 +32,13 @@ public class MergeRequestTest extends WireMockTest {
 
         MergeRequest task = MergeRequest.builder()
             .id("create-merge-request")
-            .projectId("12345")
-            .token("test-token")
-            .url(wireMock.baseUrl())
-            .title("Test merge request")
-            .description("This is a test merge request")
-            .sourceBranch("feature/test-branch")
-            .targetBranch("main")
+            .projectId(Property.of("12345"))
+            .token(Property.of("test-token"))
+            .url(Property.of(wireMock.baseUrl()))
+            .title(Property.of("Test merge request"))
+            .mergeRequestDescription(Property.of("This is a test merge request"))
+            .sourceBranch(Property.of("feature/test-branch"))
+            .targetBranch(Property.of("main"))
             .build();
 
         MergeRequest.Output runOutput = task.run(runContext);
@@ -56,13 +57,13 @@ public class MergeRequestTest extends WireMockTest {
 
         MergeRequest task = MergeRequest.builder()
             .id("create-merge-request")
-            .projectId("54321")
-            .token("test-token")
-            .url(wireMock.baseUrl())
-            .title("Test merge request")
-            .description("This is a test merge request")
-            .sourceBranch("feature/test-branch")
-            .targetBranch("main")
+            .projectId(Property.of("54321"))
+            .token(Property.of("test-token"))
+            .url(Property.of(wireMock.baseUrl()))
+            .title(Property.of("Test merge request"))
+            .mergeRequestDescription(Property.of("This is a test merge request"))
+            .sourceBranch(Property.of("feature/test-branch"))
+            .targetBranch(Property.of("main"))
             .build();
 
         assertThrows(Exception.class, () -> task.run(runContext));
@@ -74,11 +75,11 @@ public class MergeRequestTest extends WireMockTest {
 
         MergeRequest task = MergeRequest.builder()
             .id("create-merge-request")
-            .token("test-token")
-            .url(wireMock.baseUrl())
-            .title("Test merge request")
-            .sourceBranch("feature/test-branch")
-            .targetBranch("main")
+            .token(Property.of("test-token"))
+            .url(Property.of(wireMock.baseUrl()))
+            .title(Property.of("Test merge request"))
+            .sourceBranch(Property.of("feature/test-branch"))
+            .targetBranch(Property.of("main"))
             .build();
 
         assertThrows(Exception.class, () -> task.run(runContext));
@@ -90,11 +91,11 @@ public class MergeRequestTest extends WireMockTest {
 
         MergeRequest task = MergeRequest.builder()
             .id("create-merge-request")
-            .projectId("12345")
-            .url(wireMock.baseUrl())
-            .title("Test merge request")
-            .sourceBranch("feature/test-branch")
-            .targetBranch("main")
+            .projectId(Property.of("12345"))
+            .url(Property.of(wireMock.baseUrl()))
+            .title(Property.of("Test merge request"))
+            .sourceBranch(Property.of("feature/test-branch"))
+            .targetBranch(Property.of("main"))
             .build();
 
         assertThrows(Exception.class, () -> task.run(runContext));
@@ -111,11 +112,11 @@ public class MergeRequestTest extends WireMockTest {
         // Test with null title - should create MR but GitLab API will likely fail
         MergeRequest task = MergeRequest.builder()
             .id("create-merge-request")
-            .projectId("12345")
-            .token("test-token")
-            .url(wireMock.baseUrl())
-            .sourceBranch("feature/test-branch")
-            .targetBranch("main")
+            .projectId(Property.of("12345"))
+            .token(Property.of("test-token"))
+            .url(Property.of(wireMock.baseUrl()))
+            .sourceBranch(Property.of("feature/test-branch"))
+            .targetBranch(Property.of("main"))
             .build();
 
         // This should complete without throwing since title is optional in our implementation
@@ -137,12 +138,12 @@ public class MergeRequestTest extends WireMockTest {
 
         MergeRequest task = MergeRequest.builder()
             .id("create-merge-request")
-            .projectId("12345")
-            .token("test-token")
-            .url(wireMock.baseUrl())
-            .title("Minimal MR")
-            .sourceBranch("feature")
-            .targetBranch("main")
+            .projectId(Property.of("12345"))
+            .token(Property.of("test-token"))
+            .url(Property.of(wireMock.baseUrl()))
+            .title(Property.of("Minimal MR"))
+            .sourceBranch(Property.of("feature"))
+            .targetBranch(Property.of("main"))
             .build();
 
         MergeRequest.Output runOutput = task.run(runContext);
@@ -165,12 +166,12 @@ public class MergeRequestTest extends WireMockTest {
 
         MergeRequest task = MergeRequest.builder()
             .id("create-merge-request")
-            .projectId("12345")
-            .token("test-token")
-            .url(wireMock.baseUrl())
-            .title("Test merge request")
-            .sourceBranch("feature/test-branch")
-            .targetBranch("main")
+            .projectId(Property.of("12345"))
+            .token(Property.of("test-token"))
+            .url(Property.of(wireMock.baseUrl()))
+            .title(Property.of("Test merge request"))
+            .sourceBranch(Property.of("feature/test-branch"))
+            .targetBranch(Property.of("main"))
             .build();
 
         assertThrows(Exception.class, () -> task.run(runContext));

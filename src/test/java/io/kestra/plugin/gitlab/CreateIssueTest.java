@@ -1,8 +1,9 @@
 package io.kestra.plugin.gitlab;
 
+import io.kestra.core.models.property.Property;
 import io.kestra.core.runners.RunContext;
 import io.kestra.core.runners.RunContextFactory;
-import io.kestra.plugin.gitlab.issues.CreateIssue;
+import io.kestra.plugin.gitlab.issues.Create;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
 
@@ -28,16 +29,16 @@ public class CreateIssueTest extends WireMockTest {
 
         RunContext runContext = runContextFactory.of();
 
-        CreateIssue task = CreateIssue.builder()
+        Create task = Create.builder()
             .id("create-issue")
-            .projectId("12345")
-            .token("test-token")
-            .url(wireMock.baseUrl())
-            .title("Test issue")
-            .description("This is a test issue")
+            .projectId(Property.of("12345"))
+            .token(Property.of("test-token"))
+            .url(Property.of(wireMock.baseUrl()))
+            .title(Property.of("Test issue"))
+            .issueDescription(Property.of("This is a test issue"))
             .build();
 
-        CreateIssue.Output runOutput = task.run(runContext);
+        Create.Output runOutput = task.run(runContext);
 
         assertThat(runOutput.getIssueId(), is(notNullValue()));
         assertThat(runOutput.getWebUrl(), is(notNullValue()));
@@ -51,13 +52,13 @@ public class CreateIssueTest extends WireMockTest {
 
         RunContext runContext = runContextFactory.of();
 
-        CreateIssue task = CreateIssue.builder()
+        Create task = Create.builder()
             .id("create-issue")
-            .projectId("54321")
-            .token("test-token")
-            .url(wireMock.baseUrl())
-            .title("Test issue")
-            .description("This is a test issue")
+            .projectId(Property.of("54321"))
+            .token(Property.of("test-token"))
+            .url(Property.of(wireMock.baseUrl()))
+            .title(Property.of("Test issue"))
+            .issueDescription(Property.of("This is a test issue"))
             .build();
 
         assertThrows(Exception.class, () -> task.run(runContext));
@@ -66,12 +67,12 @@ public class CreateIssueTest extends WireMockTest {
     @Test
     void testCreateIssue_missingProjectId() throws Exception {
         RunContext runContext = runContextFactory.of();
-        
-        CreateIssue task = CreateIssue.builder()
+
+        Create task = Create.builder()
             .id("create-issue")
-            .token("test-token")
-            .url(wireMock.baseUrl())
-            .title("Test issue")
+            .token(Property.of("test-token"))
+            .url(Property.of(wireMock.baseUrl()))
+            .title(Property.of("Test issue"))
             .build();
 
         assertThrows(Exception.class, () -> task.run(runContext));
@@ -80,12 +81,12 @@ public class CreateIssueTest extends WireMockTest {
     @Test
     void testCreateIssue_missingToken() throws Exception {
         RunContext runContext = runContextFactory.of();
-        
-        CreateIssue task = CreateIssue.builder()
+
+        Create task = Create.builder()
             .id("create-issue")
-            .projectId("12345")
-            .url(wireMock.baseUrl())
-            .title("Test issue")
+            .projectId(Property.of("12345"))
+            .url(Property.of(wireMock.baseUrl()))
+            .title(Property.of("Test issue"))
             .build();
 
         assertThrows(Exception.class, () -> task.run(runContext));
@@ -102,16 +103,16 @@ public class CreateIssueTest extends WireMockTest {
                 .withBody("{\"id\":2,\"web_url\":\"https://gitlab.example.com/test/issues/2\"}")));
 
         RunContext runContext = runContextFactory.of();
-        
-        CreateIssue task = CreateIssue.builder()
+
+        Create task = Create.builder()
             .id("create-issue")
-            .projectId("12345")
-            .token("test-token")
-            .url(wireMock.baseUrl())
-            .title("Minimal Issue")
+            .projectId(Property.of("12345"))
+            .token(Property.of("test-token"))
+            .url(Property.of(wireMock.baseUrl()))
+            .title(Property.of("Minimal Issue"))
             .build();
 
-        CreateIssue.Output runOutput = task.run(runContext);
+        Create.Output runOutput = task.run(runContext);
         assertThat(runOutput.getIssueId(), is("2"));
         assertThat(runOutput.getWebUrl(), is("https://gitlab.example.com/test/issues/2"));
     }

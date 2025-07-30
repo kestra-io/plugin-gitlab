@@ -6,10 +6,11 @@ import io.kestra.core.http.HttpResponse;
 import io.kestra.core.http.client.HttpClient;
 import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Plugin;
-import io.kestra.core.models.annotations.PluginProperty;
+import io.kestra.core.models.property.Property;
 import io.kestra.core.models.tasks.RunnableTask;
 import io.kestra.core.runners.RunContext;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -28,7 +29,7 @@ import java.util.Map;
 )
 @Plugin(examples = {
     @Example(
-        title = "Create a merge request in a GitLab project using a [project access token](https://docs.gitlab.com/ee/user/project/settings/project_access_tokens.html).",
+        title = "Create a merge request in a GitLab project using a project access token.",
         full = true,
         code = """
             id: gitlab_merge_request
@@ -41,32 +42,28 @@ import java.util.Map;
                 token: "{{ secret('GITLAB_TOKEN') }}"
                 projectId: "123"
                 title: "Feature: Add new functionality"
-                description: "This merge request adds new functionality to the project"
+                mergeRequestDescription: "This merge request adds new functionality to the project"
                 sourceBranch: "feat-testing"
                 targetBranch: "main"
             """
     )
 })
-public class MergeRequest extends   AbstractGitLabTask implements RunnableTask<MergeRequest.Output> {
+public class MergeRequest extends AbstractGitLabTask implements RunnableTask<MergeRequest.Output> {
 
     @Schema(title = "Merge request title")
-    @PluginProperty(dynamic = true)
-    private String title;
+    @NotNull
+    private Property<String> title;
 
     @Schema(title = "Source branch")
-    @PluginProperty(dynamic = true)
-    private String sourceBranch;
+    @NotNull
+    private Property<String> sourceBranch;
 
     @Schema(title = "Target branch")
-    @PluginProperty(dynamic = true)
-    private String targetBranch;
+    @NotNull
+    private Property<String> targetBranch;
 
     @Schema(title = "Merge request description")
-    @PluginProperty(dynamic = true)
-    private String description;
-
-
-
+    private Property<String> mergeRequestDescription;
 
     @Override
     public Output run(RunContext runContext) throws Exception {
@@ -77,28 +74,25 @@ public class MergeRequest extends   AbstractGitLabTask implements RunnableTask<M
 
             // Required fields for  merge request creation
             if(this.title != null) {
-                body.put("title", runContext.render(this.title));
+                body.put("title", runContext.render(this.title).as(String.class).orElseThrow());
             }
 
             if(this.sourceBranch != null) {
-                body.put("source_branch", runContext.render(this.sourceBranch));
+                body.put("source_branch", runContext.render(this.sourceBranch).as(String.class).orElseThrow());
             }
 
             if(this.targetBranch != null) {
-                body.put("target_branch", runContext.render(this.targetBranch));
+                body.put("target_branch", runContext.render(this.targetBranch).as(String.class).orElseThrow());
             }
 
             // Optional fields
-            if (this.description != null) {
-                body.put("description", runContext.render(this.description));
+            if (this.mergeRequestDescription != null) {
+                body.put("description", runContext.render(this.mergeRequestDescription).as(String.class).orElseThrow());
             }
 
             ObjectMapper mapper = new ObjectMapper();
             String jsonBody = mapper.writeValueAsString(body);
-
-
-            String endpoint = "/api/v4/projects/" + runContext.render(this.getProjectId()) + "/merge_requests";
-
+            String endpoint = buildApiEndpoint("merge_requests", runContext);
 
             HttpRequest request = authenticatedRequestBuilder(endpoint, runContext)
                 .method("POST")
@@ -114,8 +108,6 @@ public class MergeRequest extends   AbstractGitLabTask implements RunnableTask<M
                 .webUrl(result.get("web_url").toString())
                 .statusCode(response.getStatus().getCode())
                 .build();
-
-
         }
     }
 

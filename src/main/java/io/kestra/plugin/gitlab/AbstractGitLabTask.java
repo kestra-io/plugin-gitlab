@@ -4,10 +4,11 @@ import io.kestra.core.exceptions.IllegalVariableEvaluationException;
 import io.kestra.core.http.HttpRequest;
 import io.kestra.core.http.client.HttpClient;
 import io.kestra.core.http.client.configurations.HttpConfiguration;
-import io.kestra.core.models.annotations.PluginProperty;
+import io.kestra.core.models.property.Property;
 import io.kestra.core.models.tasks.Task;
 import io.kestra.core.runners.RunContext;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -23,15 +24,19 @@ public abstract class AbstractGitLabTask extends Task {
 
     @Schema(title = "GitLab URL", description = "GitLab URL")
     @Builder.Default
-    private String url = "https://gitlab.com";
+    private Property<String> url = Property.of( "https://gitlab.com");
 
     @Schema(title = "Personal Access Token", description = "GitLab Personal Access Token")
-    @PluginProperty(dynamic = true)
-    private  String token;
+    @NotNull
+    private Property<String> token;
 
     @Schema(title = "Project ID", description = "GitLab project ID")
-    @PluginProperty(dynamic = true)
-    private String projectId;
+    @NotNull
+    private Property<String> projectId;
+
+    @Schema(title = "API Path", description = "Custom API path for GitLab API endpoints")
+    @Builder.Default
+    private Property<String> apiPath = Property.of("/api/v4/projects");
 
     protected HttpClient httpClient(RunContext runContext) throws IllegalVariableEvaluationException {
 
@@ -41,8 +46,8 @@ public abstract class AbstractGitLabTask extends Task {
     }
 
     protected HttpRequest.HttpRequestBuilder authenticatedRequestBuilder(String endpoint, RunContext runContext) throws IllegalVariableEvaluationException{
-        String baseUrl = runContext.render(this.url);
-        String renderedToken = runContext.render(this.token);
+        String baseUrl = runContext.render(this.url).as(String.class).orElseThrow();
+        String renderedToken = runContext.render(this.token).as(String.class).orElseThrow();
 
         String fullUrl = baseUrl + endpoint;
 
@@ -50,6 +55,12 @@ public abstract class AbstractGitLabTask extends Task {
             .uri(URI.create(fullUrl))
             .addHeader("PRIVATE-TOKEN", renderedToken)
             .addHeader("Content-Type", "application/json");
+    }
+
+    protected String buildApiEndpoint(String resource, RunContext runContext) throws IllegalVariableEvaluationException {
+        String renderedApiPath = runContext.render(this.apiPath).as(String.class).orElseThrow();
+        String renderedProjectId = runContext.render(this.getProjectId()).as(String.class).orElseThrow();
+        return renderedApiPath + "/" + renderedProjectId + "/" + resource;
     }
 
 }
