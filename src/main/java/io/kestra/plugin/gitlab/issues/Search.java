@@ -25,8 +25,9 @@ import java.util.Map;
 @Getter
 @NoArgsConstructor
 @Schema(
-    title = "Search GitLab issues",
-    description = "Search for issues in a GitLab project"
+    title = "Search GitLab issues.",
+    description = "Search for issues in a GitLab project. " +
+        "You need to provide a valid GitLab project ID and a personal access token with the necessary permissions."
 )
 @Plugin(examples = {
     @Example(

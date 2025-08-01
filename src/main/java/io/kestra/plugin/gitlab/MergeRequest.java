@@ -24,8 +24,9 @@ import java.util.Map;
 @Getter
 @NoArgsConstructor
 @Schema(
-    title = "Create a GitLab merge request",
-    description = "Create a new merger request in a GitLab project"
+    title = "Create a GitLab merge request.",
+    description = "Create a new merge request in a GitLab project. " +
+        "You need to provide a valid GitLab project ID and a personal access token with the necessary permissions."
 )
 @Plugin(examples = {
     @Example(
