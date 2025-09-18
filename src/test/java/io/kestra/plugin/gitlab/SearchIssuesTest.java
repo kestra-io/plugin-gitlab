@@ -32,10 +32,10 @@ public class SearchIssuesTest extends WireMockTest {
 
         Search task = Search.builder()
             .id("search-issues")
-            .projectId(Property.of("12345"))
-            .token(Property.of("test-token"))
-            .url(Property.of(wireMock.baseUrl()))
-            .search(Property.of("Test issue"))
+            .projectId(Property.ofValue("12345"))
+            .token(Property.ofValue("test-token"))
+            .url(Property.ofValue(wireMock.baseUrl()))
+            .search(Property.ofValue("Test issue"))
             .build();
 
         RunContext runContext = runContextFactory.of();
@@ -57,11 +57,11 @@ public class SearchIssuesTest extends WireMockTest {
 
         Search task = Search.builder()
             .id("search-issues")
-            .projectId(Property.of("12345"))
-            .token(Property.of("test-token"))
-            .url(Property.of(wireMock.baseUrl()))
-            .search(Property.of("Test issue"))
-            .state(Property.of("closed"))
+            .projectId(Property.ofValue("12345"))
+            .token(Property.ofValue("test-token"))
+            .url(Property.ofValue(wireMock.baseUrl()))
+            .search(Property.ofValue("Test issue"))
+            .state(Property.ofValue("closed"))
             .build();
 
         RunContext runContext = runContextFactory.of();
@@ -80,10 +80,10 @@ public class SearchIssuesTest extends WireMockTest {
 
         Search task = Search.builder()
             .id("search-issues")
-            .projectId(Property.of("54321"))
-            .token(Property.of("test-token"))
-            .url(Property.of(wireMock.baseUrl()))
-            .search(Property.of("Test issue"))
+            .projectId(Property.ofValue("54321"))
+            .token(Property.ofValue("test-token"))
+            .url(Property.ofValue(wireMock.baseUrl()))
+            .search(Property.ofValue("Test issue"))
             .build();
 
         RunContext runContext = runContextFactory.of();

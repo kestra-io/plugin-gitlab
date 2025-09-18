@@ -31,11 +31,11 @@ public class CreateIssueTest extends WireMockTest {
 
         Create task = Create.builder()
             .id("create-issue")
-            .projectId(Property.of("12345"))
-            .token(Property.of("test-token"))
-            .url(Property.of(wireMock.baseUrl()))
-            .title(Property.of("Test issue"))
-            .issueDescription(Property.of("This is a test issue"))
+            .projectId(Property.ofValue("12345"))
+            .token(Property.ofValue("test-token"))
+            .url(Property.ofValue(wireMock.baseUrl()))
+            .title(Property.ofValue("Test issue"))
+            .issueDescription(Property.ofValue("This is a test issue"))
             .build();
 
         Create.Output runOutput = task.run(runContext);
@@ -54,11 +54,11 @@ public class CreateIssueTest extends WireMockTest {
 
         Create task = Create.builder()
             .id("create-issue")
-            .projectId(Property.of("54321"))
-            .token(Property.of("test-token"))
-            .url(Property.of(wireMock.baseUrl()))
-            .title(Property.of("Test issue"))
-            .issueDescription(Property.of("This is a test issue"))
+            .projectId(Property.ofValue("54321"))
+            .token(Property.ofValue("test-token"))
+            .url(Property.ofValue(wireMock.baseUrl()))
+            .title(Property.ofValue("Test issue"))
+            .issueDescription(Property.ofValue("This is a test issue"))
             .build();
 
         assertThrows(Exception.class, () -> task.run(runContext));
@@ -70,9 +70,9 @@ public class CreateIssueTest extends WireMockTest {
 
         Create task = Create.builder()
             .id("create-issue")
-            .token(Property.of("test-token"))
-            .url(Property.of(wireMock.baseUrl()))
-            .title(Property.of("Test issue"))
+            .token(Property.ofValue("test-token"))
+            .url(Property.ofValue(wireMock.baseUrl()))
+            .title(Property.ofValue("Test issue"))
             .build();
 
         assertThrows(Exception.class, () -> task.run(runContext));
@@ -84,9 +84,9 @@ public class CreateIssueTest extends WireMockTest {
 
         Create task = Create.builder()
             .id("create-issue")
-            .projectId(Property.of("12345"))
-            .url(Property.of(wireMock.baseUrl()))
-            .title(Property.of("Test issue"))
+            .projectId(Property.ofValue("12345"))
+            .url(Property.ofValue(wireMock.baseUrl()))
+            .title(Property.ofValue("Test issue"))
             .build();
 
         assertThrows(Exception.class, () -> task.run(runContext));
@@ -106,10 +106,10 @@ public class CreateIssueTest extends WireMockTest {
 
         Create task = Create.builder()
             .id("create-issue")
-            .projectId(Property.of("12345"))
-            .token(Property.of("test-token"))
-            .url(Property.of(wireMock.baseUrl()))
-            .title(Property.of("Minimal Issue"))
+            .projectId(Property.ofValue("12345"))
+            .token(Property.ofValue("test-token"))
+            .url(Property.ofValue(wireMock.baseUrl()))
+            .title(Property.ofValue("Minimal Issue"))
             .build();
 
         Create.Output runOutput = task.run(runContext);
