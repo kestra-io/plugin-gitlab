@@ -1,5 +1,6 @@
-package io.kestra.plugin.gitlab.issues;
+package io.kestra.plugin.gitlab.core;
 
+import io.kestra.core.models.annotations.Alias;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.kestra.core.http.HttpRequest;
 import io.kestra.core.http.HttpResponse;
@@ -9,7 +10,6 @@ import io.kestra.core.models.annotations.Plugin;
 import io.kestra.core.models.property.Property;
 import io.kestra.core.models.tasks.RunnableTask;
 import io.kestra.core.runners.RunContext;
-import io.kestra.plugin.gitlab.AbstractGitLabTask;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -17,7 +17,6 @@ import lombok.experimental.SuperBuilder;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @SuperBuilder
@@ -26,92 +25,88 @@ import java.util.Map;
 @Getter
 @NoArgsConstructor
 @Schema(
-    title = "Create a GitLab issue.",
-    description = "Create a new issue in a GitLab project. " +
+    title = "Create a GitLab merge request.",
+    description = "Create a new merge request in a GitLab project. " +
         "You need to provide a valid GitLab project ID and a personal access token with the necessary permissions."
 )
-@Plugin(examples = {
+@Plugin(
+    aliases = {
+        @Alias(value = "MergeRequest", namespace = "io.kestra.plugin.gitlab")
+    },
+    
+    examples = {
     @Example(
-        title = "Create an issue in a GitLab project using a project access token.",
+        title = "Create a merge request in a GitLab project using a project access token.",
         full = true,
         code = """
-            id: gitlab_create_issue
+            id: gitlab_merge_request
             namespace: company.team
 
             tasks:
-              - id: create_issue
-                type: io.kestra.plugin.gitlab.issues.Create
+              - id: create_merge_request
+                type: io.kestra.plugin.gitlab.core.MergeRequest
                 url: https://gitlab.example.com
                 token: "{{ secret('GITLAB_TOKEN') }}"
                 projectId: "123"
-                title: "Bug report"
-                issueDescription: "Found a critical bug"
-                labels:
-                  - bug
-                  - critical
-            """
-    ),
-    @Example(
-        title = "Create an issue with custom API path for self-hosted GitLab.",
-        full = true,
-        code = """
-            id: gitlab_create_issue_custom
-            namespace: company.team
-
-            tasks:
-              - id: create_issue
-                type: io.kestra.plugin.gitlab.issues.Create
-                url: https://gitlab.example.com
-                apiPath: /api/v4/projects
-                token: "{{ secret('GITLAB_TOKEN') }}"
-                projectId: "123"
-                title: "Bug report"
-                issueDescription: "Found a critical bug"
+                title: "Feature: Add new functionality"
+                mergeRequestDescription: "This merge request adds new functionality to the project"
+                sourceBranch: "feat-testing"
+                targetBranch: "main"
             """
     )
 })
-public class Create extends AbstractGitLabTask implements RunnableTask<Create.Output> {
 
-    @Schema(title = "Issue title")
+
+
+public class MergeRequest extends AbstractGitLabTask implements RunnableTask<MergeRequest.Output> {
+
+    @Schema(title = "Merge request title")
     @NotNull
     private Property<String> title;
 
-    @Schema(title = "Issue description")
-    private Property<String> issueDescription;
+    @Schema(title = "Source branch")
+    @NotNull
+    private Property<String> sourceBranch;
 
-    @Schema(title = "Labels to assign to the issue")
-    private Property<List<String>> labels;
+    @Schema(title = "Target branch")
+    @NotNull
+    private Property<String> targetBranch;
+
+    @Schema(title = "Merge request description")
+    private Property<String> mergeRequestDescription;
 
     @Override
     public Output run(RunContext runContext) throws Exception {
         try (HttpClient client = httpClient(runContext)) {
 
             Map<String, Object> body = new HashMap<>();
+
+            // Required fields for  merge request creation
             body.put("title", runContext.render(this.title).as(String.class).orElseThrow());
-            if (this.issueDescription != null) {
-                body.put("description", runContext.render(this.issueDescription).as(String.class).orElseThrow());
+
+            body.put("source_branch", runContext.render(this.sourceBranch).as(String.class).orElseThrow());
+
+            body.put("target_branch", runContext.render(this.targetBranch).as(String.class).orElseThrow());
+
+            // Optional fields
+            if (this.mergeRequestDescription != null) {
+                body.put("description", runContext.render(this.mergeRequestDescription).as(String.class).orElseThrow());
             }
-            if (this.labels != null) {
-                List<String> renderedLabels = runContext.render(this.labels).asList(String.class);
-                body.put("labels", renderedLabels);
-            }
+
             ObjectMapper mapper = new ObjectMapper();
             String jsonBody = mapper.writeValueAsString(body);
-            String endpoint = buildApiEndpoint("issues", runContext);
+            String endpoint = buildApiEndpoint("merge_requests", runContext);
 
             HttpRequest request = authenticatedRequestBuilder(endpoint, runContext)
                 .method("POST")
-                .body(new HttpRequest.StringRequestBody("application/json",
-                    StandardCharsets.UTF_8,
-                    jsonBody))
+                .body(new HttpRequest.StringRequestBody("application/json", StandardCharsets.UTF_8, jsonBody))
                 .build();
 
             HttpResponse<Map> response = client.request(request, Map.class);
-
             Map<String, Object> result = response.getBody();
 
             return Output.builder()
-                .issueId(result.get("id").toString())
+                .mergeReqID(result.get("id").toString())
                 .webUrl(result.get("web_url").toString())
                 .statusCode(response.getStatus().getCode())
                 .build();
@@ -121,13 +116,14 @@ public class Create extends AbstractGitLabTask implements RunnableTask<Create.Ou
     @Builder
     @Getter
     public static class Output implements io.kestra.core.models.tasks.Output {
-        @Schema(title = "Created issue ID")
-        private String issueId;
+        @Schema(title = "Created merge request ID")
+        private String mergeReqID;
 
-        @Schema(title = "Issue web URL")
+        @Schema(title = "web URL")
         private String webUrl;
 
         @Schema(title = "HTTP status code")
         private Integer statusCode;
     }
+
 }

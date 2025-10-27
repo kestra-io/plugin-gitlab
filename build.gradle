@@ -47,6 +47,8 @@ dependencies {
 
     // kestra
     annotationProcessor group: "io.kestra", name: "processor", version: kestraVersion
+    
+    compileOnly group: "io.kestra", name: "plugin-core", version: kestraVersion
     compileOnly group: "io.kestra", name: "core", version: kestraVersion
     compileOnly group: "io.kestra", name: "script", version: kestraVersion
 }

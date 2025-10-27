@@ -1,4 +1,4 @@
-package io.kestra.plugin.gitlab;
+package io.kestra.plugin.gitlab.core;
 
 import io.kestra.core.junit.annotations.KestraTest;
 import io.micronaut.context.annotation.Value;
