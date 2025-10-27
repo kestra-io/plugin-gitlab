@@ -1,5 +1,5 @@
 
-package io.kestra.plugin.gitlab;
+package io.kestra.plugin.gitlab.core;
 
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import io.kestra.core.junit.annotations.KestraTest;

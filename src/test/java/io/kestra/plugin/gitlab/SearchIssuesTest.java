@@ -1,11 +1,11 @@
 
-package io.kestra.plugin.gitlab;
+package io.kestra.plugin.gitlab.core;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.kestra.core.models.property.Property;
 import io.kestra.core.runners.RunContext;
 import io.kestra.core.runners.RunContextFactory;
-import io.kestra.plugin.gitlab.issues.Search;
+import io.kestra.plugin.gitlab.core.core.issues.Search;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
 

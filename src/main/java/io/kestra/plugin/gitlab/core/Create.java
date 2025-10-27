@@ -1,5 +1,7 @@
-package io.kestra.plugin.gitlab.issues;
+package io.kestra.plugin.gitlab.core.issues;
 
+import io.kestra.core.models.annotations.Aliases;
+import io.kestra.core.models.annotations.Alias;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.kestra.core.http.HttpRequest;
 import io.kestra.core.http.HttpResponse;
@@ -9,7 +11,7 @@ import io.kestra.core.models.annotations.Plugin;
 import io.kestra.core.models.property.Property;
 import io.kestra.core.models.tasks.RunnableTask;
 import io.kestra.core.runners.RunContext;
-import io.kestra.plugin.gitlab.AbstractGitLabTask;
+import io.kestra.plugin.gitlab.core.AbstractGitLabTask;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -40,7 +42,7 @@ import java.util.Map;
 
             tasks:
               - id: create_issue
-                type: io.kestra.plugin.gitlab.issues.Create
+                type: io.kestra.plugin.gitlab.core.issues.Create
                 url: https://gitlab.example.com
                 token: "{{ secret('GITLAB_TOKEN') }}"
                 projectId: "123"
@@ -60,7 +62,7 @@ import java.util.Map;
 
             tasks:
               - id: create_issue
-                type: io.kestra.plugin.gitlab.issues.Create
+                type: io.kestra.plugin.gitlab.core.issues.Create
                 url: https://gitlab.example.com
                 apiPath: /api/v4/projects
                 token: "{{ secret('GITLAB_TOKEN') }}"
@@ -70,6 +72,12 @@ import java.util.Map;
             """
     )
 })
+@Aliases({
+    // Alias points to the old package path
+    @Alias(value = "Create", namespace = "io.kestra.plugin.gitlab.issues")
+})
+
+
 public class Create extends AbstractGitLabTask implements RunnableTask<Create.Output> {
 
     @Schema(title = "Issue title")
