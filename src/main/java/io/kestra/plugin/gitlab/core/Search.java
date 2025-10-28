@@ -1,5 +1,7 @@
-package io.kestra.plugin.gitlab.issues;
+package io.kestra.plugin.gitlab.core.issues;
 
+import io.kestra.core.models.annotations.Aliases;
+import io.kestra.core.models.annotations.Alias;
 import io.kestra.core.http.HttpRequest;
 import io.kestra.core.http.HttpResponse;
 import io.kestra.core.http.client.HttpClient;
@@ -8,7 +10,7 @@ import io.kestra.core.models.annotations.Plugin;
 import io.kestra.core.models.property.Property;
 import io.kestra.core.models.tasks.RunnableTask;
 import io.kestra.core.runners.RunContext;
-import io.kestra.plugin.gitlab.AbstractGitLabTask;
+import io.kestra.plugin.gitlab.core.AbstractGitLabTask;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -39,7 +41,7 @@ import java.util.Map;
 
             tasks:
               - id: search_issues
-                type: io.kestra.plugin.gitlab.issues.Search
+                type: io.kestra.plugin.gitlab.core.issues.Search
                 url: https://gitlab.example.com
                 token: "{{ secret('GITLAB_TOKEN') }}"
                 projectId: "123"
@@ -51,6 +53,11 @@ import java.util.Map;
             """
     )
 })
+
+@Aliases({
+    @Alias(value = "Search", namespace = "io.kestra.plugin.gitlab.issues") 
+})
+
 public class Search extends AbstractGitLabTask implements RunnableTask<Search.Output> {
 
     @Schema(title = "Search query")

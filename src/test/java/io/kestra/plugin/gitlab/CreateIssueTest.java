@@ -1,9 +1,9 @@
-package io.kestra.plugin.gitlab;
+package io.kestra.plugin.gitlab.core;
 
 import io.kestra.core.models.property.Property;
 import io.kestra.core.runners.RunContext;
 import io.kestra.core.runners.RunContextFactory;
-import io.kestra.plugin.gitlab.issues.Create;
+import io.kestra.plugin.gitlab.core.core.issues.Create;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
 

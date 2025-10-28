@@ -1,5 +1,7 @@
-package io.kestra.plugin.gitlab;
+package io.kestra.plugin.gitlab.core;
 
+import io.kestra.core.models.annotations.Aliases;
+import io.kestra.core.models.annotations.Alias;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.kestra.core.http.HttpRequest;
 import io.kestra.core.http.HttpResponse;
@@ -38,7 +40,7 @@ import java.util.Map;
 
             tasks:
               - id: create_merge_request
-                type: io.kestra.plugin.gitlab.MergeRequest
+                type: io.kestra.plugin.gitlab.core.core.MergeRequest
                 url: https://gitlab.example.com
                 token: "{{ secret('GITLAB_TOKEN') }}"
                 projectId: "123"
@@ -49,6 +51,11 @@ import java.util.Map;
             """
     )
 })
+
+@Aliases({
+    @Alias(value = "MergeRequest", namespace = "io.kestra.plugin.gitlab")
+})
+
 public class MergeRequest extends AbstractGitLabTask implements RunnableTask<MergeRequest.Output> {
 
     @Schema(title = "Merge request title")

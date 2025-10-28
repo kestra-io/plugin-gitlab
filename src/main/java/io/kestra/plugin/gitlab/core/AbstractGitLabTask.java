@@ -1,5 +1,7 @@
-package io.kestra.plugin.gitlab;
+package io.kestra.plugin.gitlab.core;
 
+import io.kestra.core.models.annotations.Aliases;
+import io.kestra.core.models.annotations.Alias;
 import io.kestra.core.exceptions.IllegalVariableEvaluationException;
 import io.kestra.core.http.HttpRequest;
 import io.kestra.core.http.client.HttpClient;
@@ -19,6 +21,13 @@ import java.net.URI;
 @EqualsAndHashCode
 @Getter
 @NoArgsConstructor
+
+@Aliases({
+    // Alias points to the old package path
+    @Alias(value = "AbstractGitLabTask", namespace = "io.kestra.plugin.gitlab")
+})
+
+
 public abstract class AbstractGitLabTask extends Task {
 
     @Schema(title = "GitLab URL", description = "GitLab URL")
@@ -55,7 +64,7 @@ public abstract class AbstractGitLabTask extends Task {
 
     protected String buildApiEndpoint(String resource, RunContext runContext) throws IllegalVariableEvaluationException {
         String renderedApiPath = runContext.render(this.apiPath).as(String.class).orElse("/api/v4/projects");
-        String renderedProjectId = runContext.render(this.getProjectId()).as(String.class).orElseThrow();
+        String renderedProjectId = runContext.render(this.projectId).as(String.class).orElseThrow();
         return renderedApiPath + "/" + renderedProjectId + "/" + resource;
     }
 

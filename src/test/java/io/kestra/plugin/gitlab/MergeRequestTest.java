@@ -1,4 +1,4 @@
-package io.kestra.plugin.gitlab;
+package io.kestra.plugin.gitlab.core;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.kestra.core.models.property.Property;
