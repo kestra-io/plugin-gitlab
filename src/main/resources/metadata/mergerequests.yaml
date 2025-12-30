@@ -1,6 +1,6 @@
 group: io.kestra.plugin.gitlab.mergerequests
 name: "mergerequests"
-title: "Merge Requests"
+title: "GitLab Merge Requests"
 description: "Tasks that create, update, and fetch GitLab Merge Requests."
 body: "Set the GitLab host, project ID, and access token to handle Merge Requests."
 videos: []
