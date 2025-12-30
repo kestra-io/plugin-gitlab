@@ -10,7 +10,7 @@ import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMoc
 @KestraTest
 public abstract class WireMockTest {
     @RegisterExtension
-    static WireMockExtension wireMock = WireMockExtension.newInstance()
+    public static WireMockExtension wireMock = WireMockExtension.newInstance()
         .options(wireMockConfig().dynamicPort())
         .build();
 }

@@ -1,4 +1,4 @@
-package io.kestra.plugin.gitlab;
+package io.kestra.plugin.gitlab.mergerequests;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.kestra.core.http.HttpRequest;
@@ -9,6 +9,7 @@ import io.kestra.core.models.annotations.Plugin;
 import io.kestra.core.models.property.Property;
 import io.kestra.core.models.tasks.RunnableTask;
 import io.kestra.core.runners.RunContext;
+import io.kestra.plugin.gitlab.AbstractGitLabTask;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -28,28 +29,31 @@ import java.util.Map;
     description = "Create a new merge request in a GitLab project. " +
         "You need to provide a valid GitLab project ID and a personal access token with the necessary permissions."
 )
-@Plugin(examples = {
-    @Example(
-        title = "Create a merge request in a GitLab project using a project access token.",
-        full = true,
-        code = """
-            id: gitlab_merge_request
-            namespace: company.team
+@Plugin(
+    examples = {
+        @Example(
+            title = "Create a merge request in a GitLab project using a project access token.",
+            full = true,
+            code = """
+                id: gitlab_merge_request
+                namespace: company.team
 
-            tasks:
-              - id: create_merge_request
-                type: io.kestra.plugin.gitlab.MergeRequest
-                url: https://gitlab.example.com
-                token: "{{ secret('GITLAB_TOKEN') }}"
-                projectId: "123"
-                title: "Feature: Add new functionality"
-                mergeRequestDescription: "This merge request adds new functionality to the project"
-                sourceBranch: "feat-testing"
-                targetBranch: "main"
-            """
-    )
-})
-public class MergeRequest extends AbstractGitLabTask implements RunnableTask<MergeRequest.Output> {
+                tasks:
+                  - id: create_merge_request
+                    type: io.kestra.plugin.gitlab.mergerequests.Create
+                    url: https://gitlab.example.com
+                    token: "{{ secret('GITLAB_TOKEN') }}"
+                    projectId: "123"
+                    title: "Feature: Add new functionality"
+                    mergeRequestDescription: "This merge request adds new functionality to the project"
+                    sourceBranch: "feat-testing"
+                    targetBranch: "main"
+                """
+        )
+    },
+    aliases = "io.kestra.plugin.gitlab.MergeRequest"
+)
+public class Create extends AbstractGitLabTask implements RunnableTask<Create.Output> {
 
     @Schema(title = "Merge request title")
     @NotNull
