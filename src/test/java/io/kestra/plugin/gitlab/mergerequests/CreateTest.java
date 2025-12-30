@@ -1,9 +1,10 @@
-package io.kestra.plugin.gitlab;
+package io.kestra.plugin.gitlab.mergerequests;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.kestra.core.models.property.Property;
 import io.kestra.core.runners.RunContext;
 import io.kestra.core.runners.RunContextFactory;
+import io.kestra.plugin.gitlab.WireMockTest;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
 
@@ -13,7 +14,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class MergeRequestTest extends WireMockTest {
+public class CreateTest extends WireMockTest {
     @Inject
     private RunContextFactory runContextFactory;
 
@@ -30,7 +31,7 @@ public class MergeRequestTest extends WireMockTest {
 
         RunContext runContext = runContextFactory.of();
 
-        MergeRequest task = MergeRequest.builder()
+        Create task = Create.builder()
             .id("create-merge-request")
             .projectId(Property.ofValue("12345"))
             .token(Property.ofValue("test-token"))
@@ -41,7 +42,7 @@ public class MergeRequestTest extends WireMockTest {
             .targetBranch(Property.ofValue("main"))
             .build();
 
-        MergeRequest.Output runOutput = task.run(runContext);
+        Create.Output runOutput = task.run(runContext);
 
         assertThat(runOutput.getMergeReqID(), is(notNullValue()));
         assertThat(runOutput.getWebUrl(), is(notNullValue()));
@@ -55,7 +56,7 @@ public class MergeRequestTest extends WireMockTest {
 
         RunContext runContext = runContextFactory.of();
 
-        MergeRequest task = MergeRequest.builder()
+        Create task = Create.builder()
             .id("create-merge-request")
             .projectId(Property.ofValue("54321"))
             .token(Property.ofValue("test-token"))
@@ -73,7 +74,7 @@ public class MergeRequestTest extends WireMockTest {
     void testCreateMergeRequest_missingProjectId() throws Exception {
         RunContext runContext = runContextFactory.of();
 
-        MergeRequest task = MergeRequest.builder()
+        Create task = Create.builder()
             .id("create-merge-request")
             .token(Property.ofValue("test-token"))
             .url(Property.ofValue(wireMock.baseUrl()))
@@ -89,7 +90,7 @@ public class MergeRequestTest extends WireMockTest {
     void testCreateMergeRequest_missingToken() throws Exception {
         RunContext runContext = runContextFactory.of();
 
-        MergeRequest task = MergeRequest.builder()
+        Create task = Create.builder()
             .id("create-merge-request")
             .projectId(Property.ofValue("12345"))
             .url(Property.ofValue(wireMock.baseUrl()))
@@ -110,7 +111,7 @@ public class MergeRequestTest extends WireMockTest {
         RunContext runContext = runContextFactory.of();
 
         // Test with null title - should create MR but GitLab API will likely fail
-        MergeRequest task = MergeRequest.builder()
+        Create task = Create.builder()
             .id("create-merge-request")
             .projectId(Property.ofValue("12345"))
             .token(Property.ofValue("test-token"))
@@ -136,7 +137,7 @@ public class MergeRequestTest extends WireMockTest {
 
         RunContext runContext = runContextFactory.of();
 
-        MergeRequest task = MergeRequest.builder()
+        Create task = Create.builder()
             .id("create-merge-request")
             .projectId(Property.ofValue("12345"))
             .token(Property.ofValue("test-token"))
@@ -146,7 +147,7 @@ public class MergeRequestTest extends WireMockTest {
             .targetBranch(Property.ofValue("main"))
             .build();
 
-        MergeRequest.Output runOutput = task.run(runContext);
+        Create.Output runOutput = task.run(runContext);
 
         assertThat(runOutput.getMergeReqID(), is("2"));
         assertThat(runOutput.getWebUrl(), is("https://gitlab.example.com/test/merge_requests/2"));
@@ -164,7 +165,7 @@ public class MergeRequestTest extends WireMockTest {
 
         RunContext runContext = runContextFactory.of();
 
-        MergeRequest task = MergeRequest.builder()
+        Create task = Create.builder()
             .id("create-merge-request")
             .projectId(Property.ofValue("12345"))
             .token(Property.ofValue("test-token"))

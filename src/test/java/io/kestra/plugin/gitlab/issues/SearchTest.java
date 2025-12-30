@@ -1,11 +1,11 @@
 
-package io.kestra.plugin.gitlab;
+package io.kestra.plugin.gitlab.issues;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.kestra.core.models.property.Property;
 import io.kestra.core.runners.RunContext;
 import io.kestra.core.runners.RunContextFactory;
-import io.kestra.plugin.gitlab.issues.Search;
+import io.kestra.plugin.gitlab.WireMockTest;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
 
@@ -15,7 +15,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class SearchIssuesTest extends WireMockTest {
+public class SearchTest extends WireMockTest {
     @Inject
     private RunContextFactory runContextFactory;
 
