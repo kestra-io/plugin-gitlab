@@ -32,7 +32,7 @@ import java.util.Map;
 )
 @Plugin(examples = {
     @Example(
-        title = "Create an issue in a GitLab project using a project access token.",
+        title = "Create an issue in a GitLab project using a personal access token.",
         full = true,
         code = """
             id: gitlab_create_issue
@@ -54,7 +54,7 @@ import java.util.Map;
         title = "Create an issue with custom API path for self-hosted GitLab.",
         full = true,
         code = """
-            id: gitlab_create_issue_custom
+            id: gitlab_create_issue_self_hosted
             namespace: company.team
 
             tasks:

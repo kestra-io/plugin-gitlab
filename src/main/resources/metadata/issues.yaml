@@ -2,7 +2,7 @@ group: io.kestra.plugin.gitlab.issues
 name: "issues"
 title: "Issues"
 description: "Tasks that create, update, and fetch GitLab issues."
-body: "Set the GitLab host, project ID, and access token to file issues with title/description, add comments or updates, and list or retrieve issue details for triage workflows."
+body: "Set the GitLab host name, project ID, and personal access token to file issues with title/description, add comments or updates, and list or retrieve issue details for triage workflows."
 videos: []
 createdBy: "Kestra Core Team"
 managedBy: "Kestra Core Team"

@@ -32,7 +32,7 @@ import java.util.Map;
 @Plugin(
     examples = {
         @Example(
-            title = "Create a merge request in a GitLab project using a project access token.",
+            title = "Create a merge request in a GitLab project using a personal access token.",
             full = true,
             code = """
                 id: gitlab_merge_request
@@ -41,12 +41,30 @@ import java.util.Map;
                 tasks:
                   - id: create_merge_request
                     type: io.kestra.plugin.gitlab.mergerequests.Create
-                    url: https://gitlab.example.com
                     token: "{{ secret('GITLAB_TOKEN') }}"
                     projectId: "123"
                     title: "Feature: Add new functionality"
                     mergeRequestDescription: "This merge request adds new functionality to the project"
                     sourceBranch: "feat-testing"
+                    targetBranch: "main"
+                """
+        ),
+        @Example(
+            title = "Create a merge request with custom API path for self-hosted GitLab.",
+            full = true,
+            code = """
+                id: gitlab_merge_request_self_hosted
+                namespace: company.team
+
+                tasks:
+                  - id: create_merge_request
+                    type: io.kestra.plugin.gitlab.mergerequests.Create
+                    url: https://gitlab.example.com
+                    apiPath: /api/v4/projects
+                    token: "{{ secret('GITLAB_TOKEN') }}"
+                    projectId: "123"
+                    title: "Hotfix: Critical bug fix"
+                    sourceBranch: "hotfix-branch"
                     targetBranch: "main"
                 """
         )
