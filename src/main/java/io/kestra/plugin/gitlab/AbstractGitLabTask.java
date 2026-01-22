@@ -25,7 +25,7 @@ public abstract class AbstractGitLabTask extends Task {
     @Builder.Default
     private Property<String> url = Property.ofValue("https://gitlab.com");
 
-    @Schema(title = "Personal Access Token", description = "GitLab Personal Access Token")
+    @Schema(title = "Personal, Project or Group Access Token", description = "GitLab Personal, Project or Group Access Token. More information on the [GitLab documentation](https://docs.gitlab.com/api/rest/authentication/).")
     @NotNull
     private Property<String> token;
 

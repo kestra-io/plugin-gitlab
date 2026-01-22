@@ -27,12 +27,12 @@ import java.util.Map;
 @Schema(
     title = "Create a GitLab merge request.",
     description = "Create a new merge request in a GitLab project. " +
-        "You need to provide a valid GitLab project ID and a personal access token with the necessary permissions."
+        "You need to provide a valid GitLab project ID and an access token with the necessary permissions."
 )
 @Plugin(
     examples = {
         @Example(
-            title = "Create a merge request in a GitLab project using a personal access token.",
+            title = "Create a merge request in a GitLab project using an access token.",
             full = true,
             code = """
                 id: gitlab_merge_request

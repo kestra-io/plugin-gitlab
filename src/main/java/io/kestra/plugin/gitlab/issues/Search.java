@@ -27,11 +27,11 @@ import java.util.Map;
 @Schema(
     title = "Search GitLab issues.",
     description = "Search for issues in a GitLab project. " +
-        "You need to provide a valid GitLab project ID and a personal access token with the necessary permissions."
+        "You need to provide a valid GitLab project ID and an access token with the necessary permissions."
 )
 @Plugin(examples = {
     @Example(
-        title = "Search for issues in a GitLab project using a personal access token.",
+        title = "Search for issues in a GitLab project using an access token.",
         full = true,
         code = """
             id: gitlab_search_issues
