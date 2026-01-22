@@ -2,7 +2,7 @@ group: io.kestra.plugin.gitlab
 name: "gitlab"
 title: "GitLab"
 description: "Tasks that interact with GitLab projects, commits, and issues via the API."
-body: "Provide a GitLab server URL and personal access token with project identifiers to search commits, create or update issues, and retrieve project metadata for CI/CD or governance workflows."
+body: "Provide a GitLab host name and personal access token with project identifiers to search commits, create or update issues, and retrieve project metadata for CI/CD or governance workflows."
 videos: []
 createdBy: "Kestra Core Team"
 managedBy: "Kestra Core Team"

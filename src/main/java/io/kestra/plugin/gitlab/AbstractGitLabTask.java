@@ -21,7 +21,7 @@ import java.net.URI;
 @NoArgsConstructor
 public abstract class AbstractGitLabTask extends Task {
 
-    @Schema(title = "GitLab URL", description = "GitLab URL")
+    @Schema(title = "GitLab host name", description = "The host name of the GitLab instance.")
     @Builder.Default
     private Property<String> url = Property.ofValue("https://gitlab.com");
 
@@ -29,7 +29,7 @@ public abstract class AbstractGitLabTask extends Task {
     @NotNull
     private Property<String> token;
 
-    @Schema(title = "Project ID", description = "GitLab project ID")
+    @Schema(title = "Project ID", description = "The global ID or URL-encoded path of the project.")
     @NotNull
     private Property<String> projectId;
 

@@ -111,10 +111,10 @@ public class Create extends AbstractGitLabTask implements RunnableTask<Create.Ou
     @Builder
     @Getter
     public static class Output implements io.kestra.core.models.tasks.Output {
-        @Schema(title = "Created merge request ID")
+        @Schema(title = "Merge Request ID")
         private String mergeReqID;
 
-        @Schema(title = "web URL")
+        @Schema(title = "Merge Request URL")
         private String webUrl;
 
         @Schema(title = "HTTP status code")

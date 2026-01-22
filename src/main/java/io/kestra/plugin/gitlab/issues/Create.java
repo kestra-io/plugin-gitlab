@@ -41,7 +41,6 @@ import java.util.Map;
             tasks:
               - id: create_issue
                 type: io.kestra.plugin.gitlab.issues.Create
-                url: https://gitlab.example.com
                 token: "{{ secret('GITLAB_TOKEN') }}"
                 projectId: "123"
                 title: "Bug report"
@@ -121,10 +120,10 @@ public class Create extends AbstractGitLabTask implements RunnableTask<Create.Ou
     @Builder
     @Getter
     public static class Output implements io.kestra.core.models.tasks.Output {
-        @Schema(title = "Created issue ID")
+        @Schema(title = "Issue ID")
         private String issueId;
 
-        @Schema(title = "Issue web URL")
+        @Schema(title = "Issue URL")
         private String webUrl;
 
         @Schema(title = "HTTP status code")
