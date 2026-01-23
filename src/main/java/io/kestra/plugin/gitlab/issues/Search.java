@@ -27,11 +27,11 @@ import java.util.Map;
 @Schema(
     title = "Search GitLab issues.",
     description = "Search for issues in a GitLab project. " +
-        "You need to provide a valid GitLab project ID and a personal access token with the necessary permissions."
+        "You need to provide a valid GitLab project ID and an access token with the necessary permissions."
 )
 @Plugin(examples = {
     @Example(
-        title = "Search for issues in a GitLab project using a project access token.",
+        title = "Search for issues in a GitLab project using an access token.",
         full = true,
         code = """
             id: gitlab_search_issues
@@ -40,7 +40,6 @@ import java.util.Map;
             tasks:
               - id: search_issues
                 type: io.kestra.plugin.gitlab.issues.Search
-                url: https://gitlab.example.com
                 token: "{{ secret('GITLAB_TOKEN') }}"
                 projectId: "123"
                 search: "bug"
@@ -49,6 +48,27 @@ import java.util.Map;
                   - bug
                   - critical
             """
+    ),
+    @Example(
+    title = "Search for issues in a GitLab project with custom API path for self-hosted GitLab.",
+    full = true,
+    code = """
+        id: gitlab_search_issues
+        namespace: company.team
+
+        tasks:
+            - id: search_issues
+            type: io.kestra.plugin.gitlab.issues.Search
+            url: https://gitlab.example.com
+            apiPath: /api/v4/projects
+            token: "{{ secret('GITLAB_TOKEN') }}"
+            projectId: "123"
+            search: "bug"
+            state: "opened"
+            labels:
+                - bug
+                - critical
+        """
     )
 })
 public class Search extends AbstractGitLabTask implements RunnableTask<Search.Output> {

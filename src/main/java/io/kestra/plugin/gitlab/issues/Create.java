@@ -28,11 +28,11 @@ import java.util.Map;
 @Schema(
     title = "Create a GitLab issue.",
     description = "Create a new issue in a GitLab project. " +
-        "You need to provide a valid GitLab project ID and a personal access token with the necessary permissions."
+        "You need to provide a valid GitLab project ID and an access token with the necessary permissions."
 )
 @Plugin(examples = {
     @Example(
-        title = "Create an issue in a GitLab project using a project access token.",
+        title = "Create an issue in a GitLab project using an access token.",
         full = true,
         code = """
             id: gitlab_create_issue
@@ -41,7 +41,6 @@ import java.util.Map;
             tasks:
               - id: create_issue
                 type: io.kestra.plugin.gitlab.issues.Create
-                url: https://gitlab.example.com
                 token: "{{ secret('GITLAB_TOKEN') }}"
                 projectId: "123"
                 title: "Bug report"
@@ -55,7 +54,7 @@ import java.util.Map;
         title = "Create an issue with custom API path for self-hosted GitLab.",
         full = true,
         code = """
-            id: gitlab_create_issue_custom
+            id: gitlab_create_issue_self_hosted
             namespace: company.team
 
             tasks:
@@ -121,10 +120,10 @@ public class Create extends AbstractGitLabTask implements RunnableTask<Create.Ou
     @Builder
     @Getter
     public static class Output implements io.kestra.core.models.tasks.Output {
-        @Schema(title = "Created issue ID")
+        @Schema(title = "Issue ID")
         private String issueId;
 
-        @Schema(title = "Issue web URL")
+        @Schema(title = "Issue URL")
         private String webUrl;
 
         @Schema(title = "HTTP status code")

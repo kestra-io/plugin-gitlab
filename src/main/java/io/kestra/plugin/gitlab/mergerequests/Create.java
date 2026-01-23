@@ -27,12 +27,12 @@ import java.util.Map;
 @Schema(
     title = "Create a GitLab merge request.",
     description = "Create a new merge request in a GitLab project. " +
-        "You need to provide a valid GitLab project ID and a personal access token with the necessary permissions."
+        "You need to provide a valid GitLab project ID and an access token with the necessary permissions."
 )
 @Plugin(
     examples = {
         @Example(
-            title = "Create a merge request in a GitLab project using a project access token.",
+            title = "Create a merge request in a GitLab project using an access token.",
             full = true,
             code = """
                 id: gitlab_merge_request
@@ -41,12 +41,30 @@ import java.util.Map;
                 tasks:
                   - id: create_merge_request
                     type: io.kestra.plugin.gitlab.mergerequests.Create
-                    url: https://gitlab.example.com
                     token: "{{ secret('GITLAB_TOKEN') }}"
                     projectId: "123"
                     title: "Feature: Add new functionality"
                     mergeRequestDescription: "This merge request adds new functionality to the project"
                     sourceBranch: "feat-testing"
+                    targetBranch: "main"
+                """
+        ),
+        @Example(
+            title = "Create a merge request with custom API path for self-hosted GitLab.",
+            full = true,
+            code = """
+                id: gitlab_merge_request_self_hosted
+                namespace: company.team
+
+                tasks:
+                  - id: create_merge_request
+                    type: io.kestra.plugin.gitlab.mergerequests.Create
+                    url: https://gitlab.example.com
+                    apiPath: /api/v4/projects
+                    token: "{{ secret('GITLAB_TOKEN') }}"
+                    projectId: "123"
+                    title: "Hotfix: Critical bug fix"
+                    sourceBranch: "hotfix-branch"
                     targetBranch: "main"
                 """
         )
@@ -111,10 +129,10 @@ public class Create extends AbstractGitLabTask implements RunnableTask<Create.Ou
     @Builder
     @Getter
     public static class Output implements io.kestra.core.models.tasks.Output {
-        @Schema(title = "Created merge request ID")
+        @Schema(title = "Merge Request ID")
         private String mergeReqID;
 
-        @Schema(title = "web URL")
+        @Schema(title = "Merge Request URL")
         private String webUrl;
 
         @Schema(title = "HTTP status code")
