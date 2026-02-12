@@ -25,9 +25,8 @@ import java.util.Map;
 @Getter
 @NoArgsConstructor
 @Schema(
-    title = "Create a GitLab merge request.",
-    description = "Create a new merge request in a GitLab project. " +
-        "You need to provide a valid GitLab project ID and an access token with the necessary permissions."
+    title = "Open a project merge request",
+    description = "Creates a merge request through the GitLab REST API for the target project. Requires `projectId`, `token`, `sourceBranch`, `targetBranch`, and `title`; description is optional. Supports custom `url` and `apiPath` for self-hosted GitLab and renders templated values before sending."
 )
 @Plugin(
     examples = {
@@ -73,19 +72,19 @@ import java.util.Map;
 )
 public class Create extends AbstractGitLabTask implements RunnableTask<Create.Output> {
 
-    @Schema(title = "Merge request title")
+    @Schema(title = "Merge request title", description = "Title shown on the merge request (required).")
     @NotNull
     private Property<String> title;
 
-    @Schema(title = "Source branch")
+    @Schema(title = "Source branch", description = "Branch name to merge from (required).")
     @NotNull
     private Property<String> sourceBranch;
 
-    @Schema(title = "Target branch")
+    @Schema(title = "Target branch", description = "Branch name to merge into (required).")
     @NotNull
     private Property<String> targetBranch;
 
-    @Schema(title = "Merge request description")
+    @Schema(title = "Merge request description", description = "Optional Markdown or text body for the merge request.")
     private Property<String> mergeRequestDescription;
 
     @Override
@@ -132,10 +131,10 @@ public class Create extends AbstractGitLabTask implements RunnableTask<Create.Ou
         @Schema(title = "Merge Request ID")
         private String mergeReqID;
 
-        @Schema(title = "Merge Request URL")
+        @Schema(title = "Merge Request URL", description = "Web URL of the created merge request.")
         private String webUrl;
 
-        @Schema(title = "HTTP status code")
+        @Schema(title = "HTTP status code", description = "HTTP response code from the GitLab API.")
         private Integer statusCode;
     }
 

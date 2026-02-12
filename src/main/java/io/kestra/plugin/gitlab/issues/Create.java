@@ -26,9 +26,8 @@ import java.util.Map;
 @Getter
 @NoArgsConstructor
 @Schema(
-    title = "Create a GitLab issue.",
-    description = "Create a new issue in a GitLab project. " +
-        "You need to provide a valid GitLab project ID and an access token with the necessary permissions."
+    title = "Create issue in a project",
+    description = "Creates an issue through the GitLab REST API for the specified project. Requires `projectId`, `token`, and `title`; description and labels are optional. Supports custom `url` and `apiPath` for self-hosted GitLab and renders templated values before sending."
 )
 @Plugin(examples = {
     @Example(
@@ -71,14 +70,14 @@ import java.util.Map;
 })
 public class Create extends AbstractGitLabTask implements RunnableTask<Create.Output> {
 
-    @Schema(title = "Issue title")
+    @Schema(title = "Issue title", description = "Title text for the new issue (required).")
     @NotNull
     private Property<String> title;
 
-    @Schema(title = "Issue description")
+    @Schema(title = "Issue description", description = "Optional Markdown or text body for the issue.")
     private Property<String> issueDescription;
 
-    @Schema(title = "Labels to assign to the issue")
+    @Schema(title = "Labels to assign to the issue", description = "Rendered list of labels applied to the issue.")
     private Property<List<String>> labels;
 
     @Override
@@ -123,10 +122,10 @@ public class Create extends AbstractGitLabTask implements RunnableTask<Create.Ou
         @Schema(title = "Issue ID")
         private String issueId;
 
-        @Schema(title = "Issue URL")
+        @Schema(title = "Issue URL", description = "Web URL of the created issue.")
         private String webUrl;
 
-        @Schema(title = "HTTP status code")
+        @Schema(title = "HTTP status code", description = "HTTP response code from the GitLab API.")
         private Integer statusCode;
     }
 }

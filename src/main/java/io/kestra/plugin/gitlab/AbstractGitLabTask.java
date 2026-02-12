@@ -21,19 +21,31 @@ import java.net.URI;
 @NoArgsConstructor
 public abstract class AbstractGitLabTask extends Task {
 
-    @Schema(title = "GitLab host name", description = "The host name of the GitLab instance.")
+    @Schema(
+        title = "GitLab API base URL",
+        description = "Base URL of the GitLab instance; defaults to `https://gitlab.com`. Override for self-hosted installations."
+    )
     @Builder.Default
     private Property<String> url = Property.ofValue("https://gitlab.com");
 
-    @Schema(title = "Personal, Project or Group Access Token", description = "GitLab Personal, Project or Group Access Token. More information on the [GitLab documentation](https://docs.gitlab.com/api/rest/authentication/).")
+    @Schema(
+        title = "Access token used for API calls",
+        description = "GitLab Personal/Project/Group Access Token sent as the PRIVATE-TOKEN header; requires scopes that cover the requested API operations. See the [GitLab Authentication docs](https://docs.gitlab.com/api/rest/authentication/)."
+    )
     @NotNull
     private Property<String> token;
 
-    @Schema(title = "Project ID", description = "The global ID or URL-encoded path of the project.")
+    @Schema(
+        title = "Project ID or path",
+        description = "Numeric project ID or URL-encoded project path rendered from the context to build API endpoints."
+    )
     @NotNull
     private Property<String> projectId;
 
-    @Schema(title = "API Path", description = "Custom API path for GitLab API endpoints")
+    @Schema(
+        title = "Projects API path",
+        description = "Projects API prefix appended before the project ID; defaults to `/api/v4/projects`. Override when fronting GitLab with a proxy or custom base path."
+    )
     @Builder.Default
     private Property<String> apiPath = Property.ofValue("/api/v4/projects");
 
