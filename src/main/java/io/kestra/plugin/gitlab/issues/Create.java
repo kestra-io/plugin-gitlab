@@ -26,13 +26,12 @@ import java.util.Map;
 @Getter
 @NoArgsConstructor
 @Schema(
-    title = "Create a GitLab issue.",
-    description = "Create a new issue in a GitLab project. " +
-        "You need to provide a valid GitLab project ID and a personal access token with the necessary permissions."
+    title = "Create issue in a project",
+    description = "Creates an issue through the GitLab REST API for the specified project. Requires `projectId`, `token`, and `title`; description and labels are optional. Supports custom `url` and `apiPath` for self-hosted GitLab and renders templated values before sending."
 )
 @Plugin(examples = {
     @Example(
-        title = "Create an issue in a GitLab project using a project access token.",
+        title = "Create an issue in a GitLab project using an access token.",
         full = true,
         code = """
             id: gitlab_create_issue
@@ -41,7 +40,6 @@ import java.util.Map;
             tasks:
               - id: create_issue
                 type: io.kestra.plugin.gitlab.issues.Create
-                url: https://gitlab.example.com
                 token: "{{ secret('GITLAB_TOKEN') }}"
                 projectId: "123"
                 title: "Bug report"
@@ -55,7 +53,7 @@ import java.util.Map;
         title = "Create an issue with custom API path for self-hosted GitLab.",
         full = true,
         code = """
-            id: gitlab_create_issue_custom
+            id: gitlab_create_issue_self_hosted
             namespace: company.team
 
             tasks:
@@ -72,14 +70,14 @@ import java.util.Map;
 })
 public class Create extends AbstractGitLabTask implements RunnableTask<Create.Output> {
 
-    @Schema(title = "Issue title")
+    @Schema(title = "Issue title", description = "Title text for the new issue (required).")
     @NotNull
     private Property<String> title;
 
-    @Schema(title = "Issue description")
+    @Schema(title = "Issue description", description = "Optional Markdown or text body for the issue.")
     private Property<String> issueDescription;
 
-    @Schema(title = "Labels to assign to the issue")
+    @Schema(title = "Labels to assign to the issue", description = "Rendered list of labels applied to the issue.")
     private Property<List<String>> labels;
 
     @Override
@@ -121,13 +119,13 @@ public class Create extends AbstractGitLabTask implements RunnableTask<Create.Ou
     @Builder
     @Getter
     public static class Output implements io.kestra.core.models.tasks.Output {
-        @Schema(title = "Created issue ID")
+        @Schema(title = "Issue ID")
         private String issueId;
 
-        @Schema(title = "Issue web URL")
+        @Schema(title = "Issue URL", description = "Web URL of the created issue.")
         private String webUrl;
 
-        @Schema(title = "HTTP status code")
+        @Schema(title = "HTTP status code", description = "HTTP response code from the GitLab API.")
         private Integer statusCode;
     }
 }

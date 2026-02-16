@@ -25,13 +25,12 @@ import java.util.Map;
 @Getter
 @NoArgsConstructor
 @Schema(
-    title = "Search GitLab issues.",
-    description = "Search for issues in a GitLab project. " +
-        "You need to provide a valid GitLab project ID and a personal access token with the necessary permissions."
+    title = "Search issues in a project",
+    description = "Queries GitLab issues for the target project via the REST API. Requires `projectId` and `token`; `state` defaults to `opened`. Supports custom `url` and `apiPath` for self-hosted GitLab and renders templated values before the request."
 )
 @Plugin(examples = {
     @Example(
-        title = "Search for issues in a GitLab project using a project access token.",
+        title = "Search for issues in a GitLab project using an access token.",
         full = true,
         code = """
             id: gitlab_search_issues
@@ -40,7 +39,6 @@ import java.util.Map;
             tasks:
               - id: search_issues
                 type: io.kestra.plugin.gitlab.issues.Search
-                url: https://gitlab.example.com
                 token: "{{ secret('GITLAB_TOKEN') }}"
                 projectId: "123"
                 search: "bug"
@@ -49,18 +47,39 @@ import java.util.Map;
                   - bug
                   - critical
             """
+    ),
+    @Example(
+    title = "Search for issues in a GitLab project with custom API path for self-hosted GitLab.",
+    full = true,
+    code = """
+        id: gitlab_search_issues
+        namespace: company.team
+
+        tasks:
+            - id: search_issues
+            type: io.kestra.plugin.gitlab.issues.Search
+            url: https://gitlab.example.com
+            apiPath: /api/v4/projects
+            token: "{{ secret('GITLAB_TOKEN') }}"
+            projectId: "123"
+            search: "bug"
+            state: "opened"
+            labels:
+                - bug
+                - critical
+        """
     )
 })
 public class Search extends AbstractGitLabTask implements RunnableTask<Search.Output> {
 
-    @Schema(title = "Search query")
+    @Schema(title = "Search query", description = "Free-text query matched against issue title and description.")
     private Property<String> search;
 
-    @Schema(title = "Issue state", description = "opened, closed or all")
+    @Schema(title = "Issue state", description = "Filter by state: opened, closed, or all; defaults to opened when not provided.")
     @Builder.Default
     private Property<String> state = Property.ofValue("opened");
 
-    @Schema(title = "Labels to filter by")
+    @Schema(title = "Labels to filter by", description = "Labels rendered from the context and comma-joined for the GitLab API.")
     private Property<List<String>> labels;
 
     @Override
@@ -106,10 +125,10 @@ public class Search extends AbstractGitLabTask implements RunnableTask<Search.Ou
         @Schema(title = "Found issues")
         private List<Map<String, Object>> issues;
 
-        @Schema(title = "Number of issues found")
+        @Schema(title = "Number of issues found", description = "Count of issues returned by the request.")
         private Integer count;
 
-        @Schema(title = "HTTP status code")
+        @Schema(title = "HTTP status code", description = "HTTP response code from the GitLab API.")
         private Integer statusCode;
     }
 }
