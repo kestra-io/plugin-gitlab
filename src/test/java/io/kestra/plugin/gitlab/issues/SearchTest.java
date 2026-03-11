@@ -1,13 +1,16 @@
 
 package io.kestra.plugin.gitlab.issues;
 
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.kestra.core.models.property.Property;
 import io.kestra.core.runners.RunContext;
 import io.kestra.core.runners.RunContextFactory;
 import io.kestra.plugin.gitlab.WireMockTest;
+
 import jakarta.inject.Inject;
-import org.junit.jupiter.api.Test;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -24,11 +27,14 @@ public class SearchTest extends WireMockTest {
     @Test
     void testSearchIssues() throws Exception {
         // Mock the GitLab API endpoint for searching issues
-        wireMock.stubFor(get(urlEqualTo("/api/v4/projects/12345/issues?search=Test+issue&state=opened"))
-            .willReturn(aResponse()
-                .withHeader("Content-Type", "application/json")
-                .withBody("[{\"id\":1,\"iid\":1,\"project_id\":12345,\"title\":\"Test issue\",\"web_url\":\"https://gitlab.example.com/test-group/test-project/issues/1\"}]")
-            ));
+        wireMock.stubFor(
+            get(urlEqualTo("/api/v4/projects/12345/issues?search=Test+issue&state=opened"))
+                .willReturn(
+                    aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("[{\"id\":1,\"iid\":1,\"project_id\":12345,\"title\":\"Test issue\",\"web_url\":\"https://gitlab.example.com/test-group/test-project/issues/1\"}]")
+                )
+        );
 
         Search task = Search.builder()
             .id("search-issues")
@@ -49,11 +55,14 @@ public class SearchTest extends WireMockTest {
     @Test
     void testSearchIssuesWithState() throws Exception {
         // Mock the GitLab API endpoint for searching issues
-        wireMock.stubFor(get(urlEqualTo("/api/v4/projects/12345/issues?search=Test+issue&state=closed"))
-            .willReturn(aResponse()
-                .withHeader("Content-Type", "application/json")
-                .withBody("[{\"id\":1,\"iid\":1,\"project_id\":12345,\"title\":\"Test issue\",\"web_url\":\"https://gitlab.example.com/test-group/test-project/issues/1\"}]")
-            ));
+        wireMock.stubFor(
+            get(urlEqualTo("/api/v4/projects/12345/issues?search=Test+issue&state=closed"))
+                .willReturn(
+                    aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("[{\"id\":1,\"iid\":1,\"project_id\":12345,\"title\":\"Test issue\",\"web_url\":\"https://gitlab.example.com/test-group/test-project/issues/1\"}]")
+                )
+        );
 
         Search task = Search.builder()
             .id("search-issues")
@@ -75,8 +84,10 @@ public class SearchTest extends WireMockTest {
     @Test
     void testSearchIssuesNotFound() {
         // Mock the GitLab API endpoint for a non-existent project
-        wireMock.stubFor(get(urlEqualTo("/api/v4/projects/54321/issues?search=Test+issue&state=opened"))
-            .willReturn(notFound()));
+        wireMock.stubFor(
+            get(urlEqualTo("/api/v4/projects/54321/issues?search=Test+issue&state=opened"))
+                .willReturn(notFound())
+        );
 
         Search task = Search.builder()
             .id("search-issues")
@@ -90,6 +101,5 @@ public class SearchTest extends WireMockTest {
 
         assertThrows(Exception.class, () -> task.run(runContext));
     }
-
 
 }

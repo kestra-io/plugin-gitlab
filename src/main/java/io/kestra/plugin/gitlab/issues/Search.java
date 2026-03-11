@@ -1,5 +1,11 @@
 package io.kestra.plugin.gitlab.issues;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import io.kestra.core.http.HttpRequest;
 import io.kestra.core.http.HttpResponse;
 import io.kestra.core.http.client.HttpClient;
@@ -9,15 +15,10 @@ import io.kestra.core.models.property.Property;
 import io.kestra.core.models.tasks.RunnableTask;
 import io.kestra.core.runners.RunContext;
 import io.kestra.plugin.gitlab.AbstractGitLabTask;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 @SuperBuilder
 @ToString
@@ -28,48 +29,50 @@ import java.util.Map;
     title = "Search issues in a project",
     description = "Queries GitLab issues for the target project via the REST API. Requires `projectId` and `token`; `state` defaults to `opened`. Supports custom `url` and `apiPath` for self-hosted GitLab and renders templated values before the request."
 )
-@Plugin(examples = {
-    @Example(
-        title = "Search for issues in a GitLab project using an access token.",
-        full = true,
-        code = """
-            id: gitlab_search_issues
-            namespace: company.team
+@Plugin(
+    examples = {
+        @Example(
+            title = "Search for issues in a GitLab project using an access token.",
+            full = true,
+            code = """
+                id: gitlab_search_issues
+                namespace: company.team
 
-            tasks:
-              - id: search_issues
-                type: io.kestra.plugin.gitlab.issues.Search
-                token: "{{ secret('GITLAB_TOKEN') }}"
-                projectId: "123"
-                search: "bug"
-                state: "opened"
-                labels:
-                  - bug
-                  - critical
-            """
-    ),
-    @Example(
-    title = "Search for issues in a GitLab project with custom API path for self-hosted GitLab.",
-    full = true,
-    code = """
-        id: gitlab_search_issues
-        namespace: company.team
+                tasks:
+                  - id: search_issues
+                    type: io.kestra.plugin.gitlab.issues.Search
+                    token: "{{ secret('GITLAB_TOKEN') }}"
+                    projectId: "123"
+                    search: "bug"
+                    state: "opened"
+                    labels:
+                      - bug
+                      - critical
+                """
+        ),
+        @Example(
+            title = "Search for issues in a GitLab project with custom API path for self-hosted GitLab.",
+            full = true,
+            code = """
+                id: gitlab_search_issues
+                namespace: company.team
 
-        tasks:
-            - id: search_issues
-            type: io.kestra.plugin.gitlab.issues.Search
-            url: https://gitlab.example.com
-            apiPath: /api/v4/projects
-            token: "{{ secret('GITLAB_TOKEN') }}"
-            projectId: "123"
-            search: "bug"
-            state: "opened"
-            labels:
-                - bug
-                - critical
-        """
-    )
-})
+                tasks:
+                    - id: search_issues
+                    type: io.kestra.plugin.gitlab.issues.Search
+                    url: https://gitlab.example.com
+                    apiPath: /api/v4/projects
+                    token: "{{ secret('GITLAB_TOKEN') }}"
+                    projectId: "123"
+                    search: "bug"
+                    state: "opened"
+                    labels:
+                        - bug
+                        - critical
+                """
+        )
+    }
+)
 public class Search extends AbstractGitLabTask implements RunnableTask<Search.Output> {
 
     @Schema(title = "Search query", description = "Free-text query matched against issue title and description.")

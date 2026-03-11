@@ -1,6 +1,12 @@
 package io.kestra.plugin.gitlab.issues;
 
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.kestra.core.http.HttpRequest;
 import io.kestra.core.http.HttpResponse;
 import io.kestra.core.http.client.HttpClient;
@@ -10,15 +16,11 @@ import io.kestra.core.models.property.Property;
 import io.kestra.core.models.tasks.RunnableTask;
 import io.kestra.core.runners.RunContext;
 import io.kestra.plugin.gitlab.AbstractGitLabTask;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @SuperBuilder
 @ToString
@@ -29,45 +31,47 @@ import java.util.Map;
     title = "Create issue in a project",
     description = "Creates an issue through the GitLab REST API for the specified project. Requires `projectId`, `token`, and `title`; description and labels are optional. Supports custom `url` and `apiPath` for self-hosted GitLab and renders templated values before sending."
 )
-@Plugin(examples = {
-    @Example(
-        title = "Create an issue in a GitLab project using an access token.",
-        full = true,
-        code = """
-            id: gitlab_create_issue
-            namespace: company.team
+@Plugin(
+    examples = {
+        @Example(
+            title = "Create an issue in a GitLab project using an access token.",
+            full = true,
+            code = """
+                id: gitlab_create_issue
+                namespace: company.team
 
-            tasks:
-              - id: create_issue
-                type: io.kestra.plugin.gitlab.issues.Create
-                token: "{{ secret('GITLAB_TOKEN') }}"
-                projectId: "123"
-                title: "Bug report"
-                issueDescription: "Found a critical bug"
-                labels:
-                  - bug
-                  - critical
-            """
-    ),
-    @Example(
-        title = "Create an issue with custom API path for self-hosted GitLab.",
-        full = true,
-        code = """
-            id: gitlab_create_issue_self_hosted
-            namespace: company.team
+                tasks:
+                  - id: create_issue
+                    type: io.kestra.plugin.gitlab.issues.Create
+                    token: "{{ secret('GITLAB_TOKEN') }}"
+                    projectId: "123"
+                    title: "Bug report"
+                    issueDescription: "Found a critical bug"
+                    labels:
+                      - bug
+                      - critical
+                """
+        ),
+        @Example(
+            title = "Create an issue with custom API path for self-hosted GitLab.",
+            full = true,
+            code = """
+                id: gitlab_create_issue_self_hosted
+                namespace: company.team
 
-            tasks:
-              - id: create_issue
-                type: io.kestra.plugin.gitlab.issues.Create
-                url: https://gitlab.example.com
-                apiPath: /api/v4/projects
-                token: "{{ secret('GITLAB_TOKEN') }}"
-                projectId: "123"
-                title: "Bug report"
-                issueDescription: "Found a critical bug"
-            """
-    )
-})
+                tasks:
+                  - id: create_issue
+                    type: io.kestra.plugin.gitlab.issues.Create
+                    url: https://gitlab.example.com
+                    apiPath: /api/v4/projects
+                    token: "{{ secret('GITLAB_TOKEN') }}"
+                    projectId: "123"
+                    title: "Bug report"
+                    issueDescription: "Found a critical bug"
+                """
+        )
+    }
+)
 public class Create extends AbstractGitLabTask implements RunnableTask<Create.Output> {
 
     @Schema(title = "Issue title", description = "Title text for the new issue (required).")
@@ -99,9 +103,13 @@ public class Create extends AbstractGitLabTask implements RunnableTask<Create.Ou
 
             HttpRequest request = authenticatedRequestBuilder(endpoint, runContext)
                 .method("POST")
-                .body(new HttpRequest.StringRequestBody("application/json",
-                    StandardCharsets.UTF_8,
-                    jsonBody))
+                .body(
+                    new HttpRequest.StringRequestBody(
+                        "application/json",
+                        StandardCharsets.UTF_8,
+                        jsonBody
+                    )
+                )
                 .build();
 
             HttpResponse<Map> response = client.request(request, Map.class);

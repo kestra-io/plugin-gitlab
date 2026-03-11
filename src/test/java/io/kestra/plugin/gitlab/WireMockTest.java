@@ -1,9 +1,11 @@
 
 package io.kestra.plugin.gitlab;
 
-import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
-import io.kestra.core.junit.annotations.KestraTest;
 import org.junit.jupiter.api.extension.RegisterExtension;
+
+import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
+
+import io.kestra.core.junit.annotations.KestraTest;
 
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 

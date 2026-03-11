@@ -1,12 +1,15 @@
 package io.kestra.plugin.gitlab.mergerequests;
 
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.kestra.core.models.property.Property;
 import io.kestra.core.runners.RunContext;
 import io.kestra.core.runners.RunContextFactory;
 import io.kestra.plugin.gitlab.WireMockTest;
+
 import jakarta.inject.Inject;
-import org.junit.jupiter.api.Test;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -23,11 +26,19 @@ public class CreateTest extends WireMockTest {
     @Test
     void testCreateMergeRequest() throws Exception {
         // Mock the GitLab API endpoint for creating a merge request
-        wireMock.stubFor(post(urlEqualTo("/api/v4/projects/12345/merge_requests"))
-            .withRequestBody(equalToJson("{\"title\":\"Test merge request\",\"description\":\"This is a test merge request\",\"source_branch\":\"feature/test-branch\",\"target_branch\":\"main\"}"))
-            .willReturn(aResponse()
-                .withHeader("Content-Type", "application/json")
-                .withBody("{\"id\":1,\"iid\":1,\"project_id\":12345,\"title\":\"Test merge request\",\"web_url\":\"https://gitlab.example.com/test-group/test-project/merge_requests/1\"}")));
+        wireMock.stubFor(
+            post(urlEqualTo("/api/v4/projects/12345/merge_requests"))
+                .withRequestBody(
+                    equalToJson("{\"title\":\"Test merge request\",\"description\":\"This is a test merge request\",\"source_branch\":\"feature/test-branch\",\"target_branch\":\"main\"}")
+                )
+                .willReturn(
+                    aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(
+                            "{\"id\":1,\"iid\":1,\"project_id\":12345,\"title\":\"Test merge request\",\"web_url\":\"https://gitlab.example.com/test-group/test-project/merge_requests/1\"}"
+                        )
+                )
+        );
 
         RunContext runContext = runContextFactory.of();
 
@@ -51,8 +62,10 @@ public class CreateTest extends WireMockTest {
     @Test
     void testCreateMergeRequestNotFound() {
         // Mock the GitLab API endpoint for a non-existent project
-        wireMock.stubFor(post(urlEqualTo("/api/v4/projects/54321/merge_requests"))
-            .willReturn(notFound()));
+        wireMock.stubFor(
+            post(urlEqualTo("/api/v4/projects/54321/merge_requests"))
+                .willReturn(notFound())
+        );
 
         RunContext runContext = runContextFactory.of();
 
@@ -105,8 +118,10 @@ public class CreateTest extends WireMockTest {
     @Test
     void testCreateMergeRequestWithEmptyRequiredFields() throws Exception {
         // Mock endpoint that should not be called
-        wireMock.stubFor(post(urlMatching("/api/v4/projects/.*/merge_requests"))
-            .willReturn(aResponse().withStatus(400)));
+        wireMock.stubFor(
+            post(urlMatching("/api/v4/projects/.*/merge_requests"))
+                .willReturn(aResponse().withStatus(400))
+        );
 
         RunContext runContext = runContextFactory.of();
 
@@ -128,12 +143,16 @@ public class CreateTest extends WireMockTest {
     @Test
     void testCreateMergeRequestWithMinimalData() throws Exception {
         // Mock the GitLab API endpoint for creating a merge request with minimal data
-        wireMock.stubFor(post(urlEqualTo("/api/v4/projects/12345/merge_requests"))
-            .withRequestBody(equalToJson("{\"title\":\"Minimal MR\",\"source_branch\":\"feature\",\"target_branch\":\"main\"}"))
-            .willReturn(aResponse()
-                .withStatus(201)
-                .withHeader("Content-Type", "application/json")
-                .withBody("{\"id\":2,\"web_url\":\"https://gitlab.example.com/test/merge_requests/2\"}")));
+        wireMock.stubFor(
+            post(urlEqualTo("/api/v4/projects/12345/merge_requests"))
+                .withRequestBody(equalToJson("{\"title\":\"Minimal MR\",\"source_branch\":\"feature\",\"target_branch\":\"main\"}"))
+                .willReturn(
+                    aResponse()
+                        .withStatus(201)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("{\"id\":2,\"web_url\":\"https://gitlab.example.com/test/merge_requests/2\"}")
+                )
+        );
 
         RunContext runContext = runContextFactory.of();
 
@@ -157,11 +176,15 @@ public class CreateTest extends WireMockTest {
     @Test
     void testCreateMergeRequestBadRequest() {
         // Mock the GitLab API endpoint returning bad request
-        wireMock.stubFor(post(urlEqualTo("/api/v4/projects/12345/merge_requests"))
-            .willReturn(aResponse()
-                .withStatus(400)
-                .withHeader("Content-Type", "application/json")
-                .withBody("{\"message\":\"Bad request\"}")));
+        wireMock.stubFor(
+            post(urlEqualTo("/api/v4/projects/12345/merge_requests"))
+                .willReturn(
+                    aResponse()
+                        .withStatus(400)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("{\"message\":\"Bad request\"}")
+                )
+        );
 
         RunContext runContext = runContextFactory.of();
 
