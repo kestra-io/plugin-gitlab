@@ -21,6 +21,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import io.kestra.core.models.annotations.PluginProperty;
 
 @SuperBuilder
 @ToString
@@ -76,12 +77,15 @@ public class Create extends AbstractGitLabTask implements RunnableTask<Create.Ou
 
     @Schema(title = "Issue title", description = "Title text for the new issue (required).")
     @NotNull
+    @PluginProperty(group = "main")
     private Property<String> title;
 
     @Schema(title = "Issue description", description = "Optional Markdown or text body for the issue.")
+    @PluginProperty(group = "advanced")
     private Property<String> issueDescription;
 
     @Schema(title = "Labels to assign to the issue", description = "Rendered list of labels applied to the issue.")
+    @PluginProperty(group = "advanced")
     private Property<List<String>> labels;
 
     @Override
