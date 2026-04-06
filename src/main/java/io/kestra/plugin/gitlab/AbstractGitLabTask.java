@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import io.kestra.core.models.annotations.PluginProperty;
 
 @SuperBuilder
 @ToString
@@ -27,6 +28,7 @@ public abstract class AbstractGitLabTask extends Task {
         description = "Base URL of the GitLab instance; defaults to `https://gitlab.com`. Override for self-hosted installations."
     )
     @Builder.Default
+    @PluginProperty(group = "connection")
     private Property<String> url = Property.ofValue("https://gitlab.com");
 
     @Schema(
@@ -34,6 +36,7 @@ public abstract class AbstractGitLabTask extends Task {
         description = "GitLab Personal/Project/Group Access Token sent as the PRIVATE-TOKEN header; requires scopes that cover the requested API operations. See the [GitLab Authentication docs](https://docs.gitlab.com/api/rest/authentication/)."
     )
     @NotNull
+    @PluginProperty(group = "main")
     private Property<String> token;
 
     @Schema(
@@ -41,6 +44,7 @@ public abstract class AbstractGitLabTask extends Task {
         description = "Numeric project ID or URL-encoded project path rendered from the context to build API endpoints."
     )
     @NotNull
+    @PluginProperty(group = "main")
     private Property<String> projectId;
 
     @Schema(
@@ -48,6 +52,7 @@ public abstract class AbstractGitLabTask extends Task {
         description = "Projects API prefix appended before the project ID; defaults to `/api/v4/projects`. Override when fronting GitLab with a proxy or custom base path."
     )
     @Builder.Default
+    @PluginProperty(group = "advanced")
     private Property<String> apiPath = Property.ofValue("/api/v4/projects");
 
     protected HttpClient httpClient(RunContext runContext) throws IllegalVariableEvaluationException {

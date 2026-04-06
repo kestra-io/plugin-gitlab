@@ -19,6 +19,7 @@ import io.kestra.plugin.gitlab.AbstractGitLabTask;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import io.kestra.core.models.annotations.PluginProperty;
 
 @SuperBuilder
 @ToString
@@ -76,13 +77,16 @@ import lombok.experimental.SuperBuilder;
 public class Search extends AbstractGitLabTask implements RunnableTask<Search.Output> {
 
     @Schema(title = "Search query", description = "Free-text query matched against issue title and description.")
+    @PluginProperty(group = "processing")
     private Property<String> search;
 
     @Schema(title = "Issue state", description = "Filter by state: opened, closed, or all; defaults to opened when not provided.")
     @Builder.Default
+    @PluginProperty(group = "advanced")
     private Property<String> state = Property.ofValue("opened");
 
     @Schema(title = "Labels to filter by", description = "Labels rendered from the context and comma-joined for the GitLab API.")
+    @PluginProperty(group = "advanced")
     private Property<List<String>> labels;
 
     @Override

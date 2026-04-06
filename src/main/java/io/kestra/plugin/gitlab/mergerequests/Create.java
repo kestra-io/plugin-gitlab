@@ -20,6 +20,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import io.kestra.core.models.annotations.PluginProperty;
 
 @SuperBuilder
 @ToString
@@ -76,17 +77,21 @@ public class Create extends AbstractGitLabTask implements RunnableTask<Create.Ou
 
     @Schema(title = "Merge request title", description = "Title shown on the merge request (required).")
     @NotNull
+    @PluginProperty(group = "main")
     private Property<String> title;
 
     @Schema(title = "Source branch", description = "Branch name to merge from (required).")
     @NotNull
+    @PluginProperty(group = "main")
     private Property<String> sourceBranch;
 
     @Schema(title = "Target branch", description = "Branch name to merge into (required).")
     @NotNull
+    @PluginProperty(group = "main")
     private Property<String> targetBranch;
 
     @Schema(title = "Merge request description", description = "Optional Markdown or text body for the merge request.")
+    @PluginProperty(group = "advanced")
     private Property<String> mergeRequestDescription;
 
     @Override
