@@ -36,7 +36,7 @@ public abstract class AbstractGitLabTask extends Task {
         description = "GitLab Personal/Project/Group Access Token sent as the PRIVATE-TOKEN header; requires scopes that cover the requested API operations. See the [GitLab Authentication docs](https://docs.gitlab.com/api/rest/authentication/)."
     )
     @NotNull
-    @PluginProperty(group = "main")
+    @PluginProperty(group = "main", secret = true)
     private Property<String> token;
 
     @Schema(
