@@ -1,5 +1,5 @@
 @PluginSubGroup(
-    title = "Merge Requests",
+    title = "GitLab Merge Requests",
     description = "Tasks that create, update, and fetch GitLab Merge Requests.\nSet the GitLab host name, project ID, and access token to handle Merge Requests.",
     categories = {
         PluginSubGroup.PluginCategory.INFRASTRUCTURE,
