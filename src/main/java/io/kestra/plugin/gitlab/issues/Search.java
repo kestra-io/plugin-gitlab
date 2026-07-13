@@ -59,7 +59,7 @@ import io.kestra.core.models.annotations.PluginProperty;
                 namespace: company.team
 
                 tasks:
-                    - id: search_issues
+                  - id: search_issues
                     type: io.kestra.plugin.gitlab.issues.Search
                     url: https://gitlab.example.com
                     apiPath: /api/v4/projects
@@ -68,8 +68,8 @@ import io.kestra.core.models.annotations.PluginProperty;
                     search: "bug"
                     state: "opened"
                     labels:
-                        - bug
-                        - critical
+                      - bug
+                      - critical
                 """
         )
     }
