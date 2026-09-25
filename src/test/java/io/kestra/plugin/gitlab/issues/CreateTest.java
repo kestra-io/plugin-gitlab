@@ -28,7 +28,7 @@ public class CreateTest extends WireMockTest {
                 .willReturn(
                     aResponse()
                         .withHeader("Content-Type", "application/json")
-                        .withBody("{\"id\":1,\"iid\":1,\"project_id\":12345,\"title\":\"Test issue\",\"web_url\":\"https://gitlab.example.com/test-group/test-project/issues/1\"}")
+                        .withBody("{\"id\":987,\"iid\":42,\"project_id\":12345,\"title\":\"Test issue\",\"web_url\":\"https://gitlab.example.com/test-group/test-project/issues/1\"}")
                 )
         );
 
@@ -45,7 +45,8 @@ public class CreateTest extends WireMockTest {
 
         Create.Output runOutput = task.run(runContext);
 
-        assertThat(runOutput.getIssueId(), is(notNullValue()));
+        assertThat(runOutput.getIssueId(), is("987"));
+        assertThat(runOutput.getIssueIid(), is(42));
         assertThat(runOutput.getWebUrl(), is(notNullValue()));
     }
 

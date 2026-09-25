@@ -12,6 +12,7 @@ import io.kestra.core.http.HttpResponse;
 import io.kestra.core.http.client.HttpClient;
 import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Plugin;
+import io.kestra.core.models.annotations.PluginProperty;
 import io.kestra.core.models.property.Property;
 import io.kestra.core.models.tasks.RunnableTask;
 import io.kestra.core.runners.RunContext;
@@ -21,7 +22,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import io.kestra.core.models.annotations.PluginProperty;
 
 @SuperBuilder
 @ToString
@@ -30,7 +30,7 @@ import io.kestra.core.models.annotations.PluginProperty;
 @NoArgsConstructor
 @Schema(
     title = "Create issue in a project",
-    description = "Creates an issue through the GitLab REST API for the specified project. Requires `projectId`, `token`, and `title`; description and labels are optional. Supports custom `url` and `apiPath` for self-hosted GitLab and renders templated values before sending."
+    description = "Creates an issue through the GitLab REST API for the specified project. Requires `projectId`, `token`, and `title`; description and labels are optional. Supports custom `url` and `apiPath` for self-hosted GitLab and renders templated values before sending. Returns the global `issueId`, the project-scoped `issueIid`, and the `webUrl` of the created issue."
 )
 @Plugin(
     examples = {
@@ -81,7 +81,7 @@ public class Create extends AbstractGitLabTask implements RunnableTask<Create.Ou
     private Property<String> title;
 
     @Schema(title = "Issue description", description = "Optional Markdown or text body for the issue.")
-    @PluginProperty(group = "advanced")
+    @PluginProperty(group = "main")
     private Property<String> issueDescription;
 
     @Schema(title = "Labels to assign to the issue", description = "Rendered list of labels applied to the issue.")
@@ -122,6 +122,7 @@ public class Create extends AbstractGitLabTask implements RunnableTask<Create.Ou
 
             return Output.builder()
                 .issueId(result.get("id").toString())
+                .issueIid(result.get("iid") != null ? Integer.valueOf(result.get("iid").toString()) : null)
                 .webUrl(result.get("web_url").toString())
                 .statusCode(response.getStatus().getCode())
                 .build();
@@ -131,8 +132,11 @@ public class Create extends AbstractGitLabTask implements RunnableTask<Create.Ou
     @Builder
     @Getter
     public static class Output implements io.kestra.core.models.tasks.Output {
-        @Schema(title = "Issue ID")
+        @Schema(title = "Issue ID", description = "Global GitLab issue ID, unique across the whole GitLab instance.")
         private String issueId;
+
+        @Schema(title = "Issue IID", description = "Project-scoped issue number (IID), as shown in the GitLab UI (`#<iid>`).")
+        private Integer issueIid;
 
         @Schema(title = "Issue URL", description = "Web URL of the created issue.")
         private String webUrl;
