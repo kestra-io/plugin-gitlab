@@ -13,6 +13,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class CreateTest extends WireMockTest {
@@ -126,6 +127,7 @@ public class CreateTest extends WireMockTest {
 
         Create.Output runOutput = task.run(runContext);
         assertThat(runOutput.getIssueId(), is("2"));
+        assertThat(runOutput.getIssueIid(), is(nullValue()));
         assertThat(runOutput.getWebUrl(), is("https://gitlab.example.com/test/issues/2"));
     }
 }

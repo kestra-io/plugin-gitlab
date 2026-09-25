@@ -37,6 +37,7 @@ public abstract class AbstractGitLabTask extends Task {
     )
     @NotNull
     @PluginProperty(group = "connection", secret = true)
+    @ToString.Exclude
     private Property<String> token;
 
     @Schema(
