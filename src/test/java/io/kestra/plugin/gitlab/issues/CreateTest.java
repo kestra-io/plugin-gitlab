@@ -13,6 +13,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class CreateTest extends WireMockTest {
@@ -28,7 +29,7 @@ public class CreateTest extends WireMockTest {
                 .willReturn(
                     aResponse()
                         .withHeader("Content-Type", "application/json")
-                        .withBody("{\"id\":1,\"iid\":1,\"project_id\":12345,\"title\":\"Test issue\",\"web_url\":\"https://gitlab.example.com/test-group/test-project/issues/1\"}")
+                        .withBody("{\"id\":987,\"iid\":42,\"project_id\":12345,\"title\":\"Test issue\",\"web_url\":\"https://gitlab.example.com/test-group/test-project/issues/1\"}")
                 )
         );
 
@@ -45,7 +46,8 @@ public class CreateTest extends WireMockTest {
 
         Create.Output runOutput = task.run(runContext);
 
-        assertThat(runOutput.getIssueId(), is(notNullValue()));
+        assertThat(runOutput.getIssueId(), is("987"));
+        assertThat(runOutput.getIssueIid(), is(42));
         assertThat(runOutput.getWebUrl(), is(notNullValue()));
     }
 
@@ -125,6 +127,7 @@ public class CreateTest extends WireMockTest {
 
         Create.Output runOutput = task.run(runContext);
         assertThat(runOutput.getIssueId(), is("2"));
+        assertThat(runOutput.getIssueIid(), is(nullValue()));
         assertThat(runOutput.getWebUrl(), is("https://gitlab.example.com/test/issues/2"));
     }
 }
