@@ -13,6 +13,7 @@ import io.kestra.core.http.client.HttpClient;
 import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Plugin;
 import io.kestra.core.models.annotations.PluginProperty;
+import io.kestra.core.models.annotations.TicketingField;
 import io.kestra.core.models.property.Property;
 import io.kestra.core.models.tasks.RunnableTask;
 import io.kestra.core.models.tasks.TicketingTaskInterface;
@@ -79,10 +80,12 @@ public class Create extends AbstractGitLabTask implements RunnableTask<Create.Ou
     @Schema(title = "Issue title", description = "Title text for the new issue (required).")
     @NotNull
     @PluginProperty(group = "main")
+    @TicketingField(role = TicketingField.Role.CASE_TITLE)
     private Property<String> title;
 
     @Schema(title = "Issue description", description = "Optional Markdown or text body for the issue.")
     @PluginProperty(group = "main")
+    @TicketingField(role = TicketingField.Role.CASE_DESCRIPTION)
     private Property<String> issueDescription;
 
     @Schema(title = "Labels to assign to the issue", description = "Rendered list of labels applied to the issue.")
@@ -137,9 +140,11 @@ public class Create extends AbstractGitLabTask implements RunnableTask<Create.Ou
         private String issueId;
 
         @Schema(title = "Issue IID", description = "Project-scoped issue number (IID), as shown in the GitLab UI (`#<iid>`).")
+        @TicketingField(role = TicketingField.Role.TICKET_KEY)
         private Integer issueIid;
 
         @Schema(title = "Issue URL", description = "Web URL of the created issue.")
+        @TicketingField(role = TicketingField.Role.TICKET_URL)
         private String webUrl;
 
         @Schema(title = "HTTP status code", description = "HTTP response code from the GitLab API.")
