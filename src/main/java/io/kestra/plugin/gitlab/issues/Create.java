@@ -15,6 +15,7 @@ import io.kestra.core.models.annotations.Plugin;
 import io.kestra.core.models.annotations.PluginProperty;
 import io.kestra.core.models.property.Property;
 import io.kestra.core.models.tasks.RunnableTask;
+import io.kestra.core.models.tasks.TicketingTaskInterface;
 import io.kestra.core.runners.RunContext;
 import io.kestra.plugin.gitlab.AbstractGitLabTask;
 
@@ -73,7 +74,7 @@ import lombok.experimental.SuperBuilder;
         )
     }
 )
-public class Create extends AbstractGitLabTask implements RunnableTask<Create.Output> {
+public class Create extends AbstractGitLabTask implements RunnableTask<Create.Output>, TicketingTaskInterface {
 
     @Schema(title = "Issue title", description = "Title text for the new issue (required).")
     @NotNull
