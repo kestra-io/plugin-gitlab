@@ -75,10 +75,11 @@ public abstract class AbstractGitLabTask extends Task {
     }
 
     protected String buildApiEndpoint(String resource, RunContext runContext) throws IllegalVariableEvaluationException {
-        String renderedApiPath = runContext.render(this.apiPath).as(String.class).orElse("/api/v4/projects");
-        String renderedProjectId = runContext.render(this.getProjectId()).as(String.class).orElseThrow();
-        String encodedProjectId = UrlEscapers.urlPathSegmentEscaper().escape(renderedProjectId);
-        return renderedApiPath + "/" + encodedProjectId + "/" + resource;
+        var rApiPath = runContext.render(this.apiPath).as(String.class).orElse("/api/v4/projects");
+        var rProjectId = runContext.render(this.getProjectId()).as(String.class)
+            .orElseThrow(() -> new IllegalVariableEvaluationException("Project id is required. Set projectId to a numeric id or a group/project path."));
+        var encodedProjectId = UrlEscapers.urlPathSegmentEscaper().escape(rProjectId);
+        return rApiPath + "/" + encodedProjectId + "/" + resource;
     }
 
 }
