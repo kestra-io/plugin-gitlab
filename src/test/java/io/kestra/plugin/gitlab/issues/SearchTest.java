@@ -102,4 +102,31 @@ public class SearchTest extends WireMockTest {
         assertThrows(Exception.class, () -> task.run(runContext));
     }
 
+    @Test
+    void testSearchIssuesWithProjectPath() throws Exception {
+        wireMock.stubFor(
+            get(urlEqualTo("/api/v4/projects/gitlab-org%2Fgitlab/issues?search=bug&state=opened"))
+                .willReturn(
+                    aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("[{\"id\":1,\"iid\":1,\"project_id\":278964,\"title\":\"bug\",\"web_url\":\"https://gitlab.com/gitlab-org/gitlab/issues/1\"}]")
+                )
+        );
+
+        Search task = Search.builder()
+            .id("search-issues")
+            .projectId(Property.ofValue("gitlab-org/gitlab"))
+            .token(Property.ofValue("test-token"))
+            .url(Property.ofValue(wireMock.baseUrl()))
+            .search(Property.ofValue("bug"))
+            .build();
+
+        RunContext runContext = runContextFactory.of();
+
+        Search.Output runOutput = task.run(runContext);
+
+        assertThat(runOutput.getCount(), is(1));
+        wireMock.verify(getRequestedFor(urlEqualTo("/api/v4/projects/gitlab-org%2Fgitlab/issues?search=bug&state=opened")));
+    }
+
 }
