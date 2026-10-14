@@ -2,6 +2,8 @@ package io.kestra.plugin.gitlab;
 
 import java.net.URI;
 
+import com.google.common.net.UrlEscapers;
+
 import io.kestra.core.exceptions.IllegalVariableEvaluationException;
 import io.kestra.core.http.HttpRequest;
 import io.kestra.core.http.client.HttpClient;
@@ -42,7 +44,7 @@ public abstract class AbstractGitLabTask extends Task {
 
     @Schema(
         title = "Project ID or path",
-        description = "Numeric project ID or URL-encoded project path rendered from the context to build API endpoints."
+        description = "Numeric project ID or project path (`group/project`). The path is encoded before it is placed in the API URL."
     )
     @NotNull
     @PluginProperty(group = "destination")
@@ -75,7 +77,8 @@ public abstract class AbstractGitLabTask extends Task {
     protected String buildApiEndpoint(String resource, RunContext runContext) throws IllegalVariableEvaluationException {
         String renderedApiPath = runContext.render(this.apiPath).as(String.class).orElse("/api/v4/projects");
         String renderedProjectId = runContext.render(this.getProjectId()).as(String.class).orElseThrow();
-        return renderedApiPath + "/" + renderedProjectId + "/" + resource;
+        String encodedProjectId = UrlEscapers.urlPathSegmentEscaper().escape(renderedProjectId);
+        return renderedApiPath + "/" + encodedProjectId + "/" + resource;
     }
 
 }
