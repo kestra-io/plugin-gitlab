@@ -130,4 +130,33 @@ public class CreateTest extends WireMockTest {
         assertThat(runOutput.getIssueIid(), is(nullValue()));
         assertThat(runOutput.getWebUrl(), is("https://gitlab.example.com/test/issues/2"));
     }
+
+    @Test
+    void testCreateIssueWithProjectPath() throws Exception {
+        wireMock.stubFor(
+            post(urlEqualTo("/api/v4/projects/gitlab-org%2Fgitlab/issues"))
+                .withRequestBody(equalToJson("{\"title\":\"Test issue\",\"description\":\"This is a test issue\"}"))
+                .willReturn(
+                    aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("{\"id\":987,\"iid\":42,\"project_id\":278964,\"title\":\"Test issue\",\"web_url\":\"https://gitlab.com/gitlab-org/gitlab/issues/1\"}")
+                )
+        );
+
+        RunContext runContext = runContextFactory.of();
+
+        Create task = Create.builder()
+            .id("create-issue")
+            .projectId(Property.ofValue("gitlab-org/gitlab"))
+            .token(Property.ofValue("test-token"))
+            .url(Property.ofValue(wireMock.baseUrl()))
+            .title(Property.ofValue("Test issue"))
+            .issueDescription(Property.ofValue("This is a test issue"))
+            .build();
+
+        Create.Output runOutput = task.run(runContext);
+
+        assertThat(runOutput.getIssueId(), is("987"));
+        wireMock.verify(postRequestedFor(urlEqualTo("/api/v4/projects/gitlab-org%2Fgitlab/issues")));
+    }
 }
