@@ -2,6 +2,8 @@ package io.kestra.plugin.gitlab;
 
 import java.net.URI;
 
+import com.google.common.net.UrlEscapers;
+
 import io.kestra.core.exceptions.IllegalVariableEvaluationException;
 import io.kestra.core.http.HttpRequest;
 import io.kestra.core.http.client.HttpClient;
@@ -42,7 +44,7 @@ public abstract class AbstractGitLabTask extends Task {
 
     @Schema(
         title = "Project ID or path",
-        description = "Numeric project ID or URL-encoded project path rendered from the context to build API endpoints."
+        description = "Numeric project ID or project path (`group/project`). A raw path is encoded as one URL segment. A value that already contains a percent-escape is left unchanged."
     )
     @NotNull
     @PluginProperty(group = "destination")
@@ -73,9 +75,14 @@ public abstract class AbstractGitLabTask extends Task {
     }
 
     protected String buildApiEndpoint(String resource, RunContext runContext) throws IllegalVariableEvaluationException {
-        String renderedApiPath = runContext.render(this.apiPath).as(String.class).orElse("/api/v4/projects");
-        String renderedProjectId = runContext.render(this.getProjectId()).as(String.class).orElseThrow();
-        return renderedApiPath + "/" + renderedProjectId + "/" + resource;
+        var rApiPath = runContext.render(this.apiPath).as(String.class).orElse("/api/v4/projects");
+        var rProjectId = runContext.render(this.getProjectId()).as(String.class)
+            .orElseThrow(() -> new IllegalVariableEvaluationException("Project id is required. Set projectId to a numeric id or a group/project path."));
+        // A value that already contains a percent-escape was encoded by the caller; escaping it again turns %2F into %252F.
+        var encodedProjectId = rProjectId.matches(".*%[0-9A-Fa-f]{2}.*")
+            ? rProjectId
+            : UrlEscapers.urlPathSegmentEscaper().escape(rProjectId);
+        return rApiPath + "/" + encodedProjectId + "/" + resource;
     }
 
 }
