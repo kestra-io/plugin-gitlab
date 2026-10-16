@@ -44,7 +44,7 @@ public abstract class AbstractGitLabTask extends Task {
 
     @Schema(
         title = "Project ID or path",
-        description = "Numeric project ID or project path (`group/project`). The path is encoded before it is placed in the API URL."
+        description = "Numeric project ID or project path (`group/project`). A raw path is encoded as one URL segment. A value that already contains a percent-escape is left unchanged."
     )
     @NotNull
     @PluginProperty(group = "destination")
@@ -78,7 +78,10 @@ public abstract class AbstractGitLabTask extends Task {
         var rApiPath = runContext.render(this.apiPath).as(String.class).orElse("/api/v4/projects");
         var rProjectId = runContext.render(this.getProjectId()).as(String.class)
             .orElseThrow(() -> new IllegalVariableEvaluationException("Project id is required. Set projectId to a numeric id or a group/project path."));
-        var encodedProjectId = UrlEscapers.urlPathSegmentEscaper().escape(rProjectId);
+        // A value that already contains a percent-escape was encoded by the caller; escaping it again turns %2F into %252F.
+        var encodedProjectId = rProjectId.matches(".*%[0-9A-Fa-f]{2}.*")
+            ? rProjectId
+            : UrlEscapers.urlPathSegmentEscaper().escape(rProjectId);
         return rApiPath + "/" + encodedProjectId + "/" + resource;
     }
 
