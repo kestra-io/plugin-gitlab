@@ -1,11 +1,14 @@
 package io.kestra.plugin.gitlab.pipelines;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
 import io.kestra.core.models.property.Property;
+import io.kestra.core.models.triggers.StatefulTriggerService;
 import io.kestra.core.runners.RunContextFactory;
 import io.kestra.core.utils.IdUtils;
 import io.kestra.core.utils.TestsUtils;
@@ -131,7 +134,35 @@ class TriggerTest extends WireMockTest {
 
         var e = assertThrows(IllegalArgumentException.class, () -> trigger.evaluate(context.getKey(), context.getValue()));
 
-        assertThat(e.getMessage(), containsString("`stateTtl` must be at least twice the polling `interval` (PT2M), got PT1M."));
+        assertThat(e.getMessage(), containsString("`stateTtl` must be at least twice the polling `interval` (PT1M), so at least PT2M, got PT1M."));
         wireMock.verify(0, getRequestedFor(urlPathEqualTo(PIPELINES)));
+    }
+
+    @Test
+    void shouldKeepAPipelineThatIsStillListedFromExpiringAndFiringAgain() throws Exception {
+        wireMock.stubFor(
+            get(urlPathEqualTo(PIPELINES)).willReturn(okJson("""
+                [{"id":2,"status":"failed","ref":"main","updated_at":"2026-10-19T10:02:00.000Z"}]
+                """))
+        );
+        var ttl = Duration.ofMinutes(2);
+        var stateKey = "gitlab-pipelines-" + IdUtils.create();
+        var trigger = trigger().stateKey(Property.ofValue(stateKey)).stateTtl(Property.ofValue(ttl)).build();
+        var context = TestsUtils.mockTrigger(runContextFactory, trigger);
+        var runContext = context.getKey().getRunContext();
+
+        assertThat(trigger.evaluate(context.getKey(), context.getValue()).isEmpty(), is(true));
+
+        // Age pipeline 2 to just under the TTL, as if it had been seen two polls ago.
+        var state = StatefulTriggerService.readState(runContext, stateKey, Optional.of(ttl));
+        var seen = state.get("2");
+        var aged = Instant.now().minus(ttl).plusSeconds(5);
+        state.put("2", new StatefulTriggerService.Entry(seen.uri(), seen.version(), seen.modifiedAt(), aged));
+        StatefulTriggerService.writeState(runContext, stateKey, state, Optional.of(ttl));
+
+        assertThat(trigger.evaluate(context.getKey(), context.getValue()).isEmpty(), is(true));
+
+        var refreshed = StatefulTriggerService.readState(runContext, stateKey, Optional.of(ttl)).get("2");
+        assertThat(refreshed.lastSeenAt().isAfter(aged), is(true));
     }
 }

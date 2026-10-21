@@ -201,7 +201,7 @@ public class Trigger extends AbstractTrigger implements PollingTriggerInterface,
         var rTtl = runContext.render(stateTtl).as(Duration.class);
         if (rTtl.isPresent() && rTtl.get().compareTo(interval.multipliedBy(2)) < 0) {
             throw new IllegalArgumentException(
-                "`stateTtl` must be at least twice the polling `interval` (%s), got %s.".formatted(interval.multipliedBy(2), rTtl.get())
+                "`stateTtl` must be at least twice the polling `interval` (%s), so at least %s, got %s.".formatted(interval, interval.multipliedBy(2), rTtl.get())
             );
         }
         var rStatuses = runContext.render(statuses).asList(PipelineStatus.class).stream().map(PipelineStatus::apiValue).toList();
@@ -244,6 +244,17 @@ public class Trigger extends AbstractTrigger implements PollingTriggerInterface,
             var candidate = StatefulTriggerService.Entry.candidate(String.valueOf(pipeline.getId()), pipeline.getStatus(), modifiedAt);
             if (computeAndUpdateState(state, candidate, rOn).fire()) {
                 finished.add(pipeline);
+            }
+        }
+
+        // computeAndUpdateState keeps the old lastSeenAt for a pipeline that does not fire, so an entry could expire
+        // while the pipeline is still listed and fire again; refresh every pipeline this poll listed.
+        var polledAt = Instant.now();
+        for (var pipeline : listed) {
+            var key = String.valueOf(pipeline.getId());
+            var seen = state.get(key);
+            if (seen != null) {
+                state.put(key, new StatefulTriggerService.Entry(seen.uri(), seen.version(), seen.modifiedAt(), polledAt));
             }
         }
 
