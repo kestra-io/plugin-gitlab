@@ -186,7 +186,9 @@ public class Trigger extends AbstractTrigger implements PollingTriggerInterface,
         description = """
             How long the pipelines already seen are remembered. Defaults to `P7D` and must be at least twice the polling `interval`, \
             otherwise the state expires between two polls and new pipelines are never reported. The `updated_after` watermark \
-            already keeps older pipelines from being listed again, so the state only needs to cover recent ones."""
+            already keeps older pipelines from being listed again, so the state only needs to cover recent ones. \
+            If the trigger is paused for longer than `stateTtl`, the state expires and the next poll starts over as a first poll: \
+            it records the pipelines that finished meanwhile without starting an execution."""
     )
     @Builder.Default
     @PluginProperty(group = "advanced")
