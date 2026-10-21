@@ -24,9 +24,6 @@ public abstract class AbstractPipelineActionTask extends AbstractPipelineTask {
     @PluginProperty(group = "main")
     private Property<Long> pipelineId;
 
-    /**
-     * Renders {@code pipelineId} and calls {@code pipelines/<id><suffix>} with the given method.
-     */
     protected Pipeline pipelineAction(RunContext runContext, String method, String suffix) throws Exception {
         var rPipelineId = runContext.render(this.pipelineId).as(Long.class)
             .orElseThrow(() -> new IllegalArgumentException("`pipelineId` is required: set the global ID of the pipeline."));

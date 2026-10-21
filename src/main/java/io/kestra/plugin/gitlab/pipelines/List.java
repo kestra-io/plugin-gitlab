@@ -204,9 +204,6 @@ public class List extends AbstractPipelineTask implements RunnableTask<List.Outp
         return output;
     }
 
-    /**
-     * Reads the pipelines matching this task's filters into memory, without logging, for callers such as {@link Trigger}.
-     */
     java.util.List<Pipeline> fetch(RunContext runContext) throws Exception {
         var rLimit = renderLimit(runContext);
         try (var client = httpClient(runContext)) {
@@ -218,9 +215,6 @@ public class List extends AbstractPipelineTask implements RunnableTask<List.Outp
         return boundedInt(runContext.render(this.limit).as(Integer.class).orElse(DEFAULT_LIMIT), "limit", 1, MAX_LIMIT);
     }
 
-    /**
-     * Lazily pages through the API: each page is requested only when the previous one has been consumed.
-     */
     private Flux<Pipeline> pipelines(RunContext runContext, HttpClient client, int rLimit) throws IllegalVariableEvaluationException {
         var pageSize = Math.min(rLimit, MAX_PAGE_SIZE);
         var filters = new ArrayList<String>();
@@ -276,13 +270,11 @@ public class List extends AbstractPipelineTask implements RunnableTask<List.Outp
         try (var writer = Files.newBufferedWriter(file, StandardCharsets.UTF_8)) {
             count = await(FileSerde.writeAll(writer, pipelines));
         }
-        URI uri = runContext.storage().putFile(file.toFile());
+        var uri = runContext.storage().putFile(file.toFile());
         return Output.builder().size((int) count).uri(uri).build();
     }
 
-    /**
-     * Blocks on the publisher and rethrows the original checked exception instead of Reactor's wrapper.
-     */
+    // Rethrows the original checked exception instead of Reactor's wrapper.
     private static <T> T await(Mono<T> mono) throws Exception {
         try {
             return mono.block();

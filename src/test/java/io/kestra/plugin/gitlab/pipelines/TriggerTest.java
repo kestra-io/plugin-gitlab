@@ -72,7 +72,7 @@ class TriggerTest extends WireMockTest {
 
         assertThat(first.isEmpty(), is(true));
         assertThat(second.isPresent(), is(true));
-        Map<String, Object> variables = second.get().getTrigger().getVariables();
+        var variables = second.get().getTrigger().getVariables();
         assertThat(variables.get("total"), is(2));
         assertThat(((Number) ((Map<?, ?>) variables.get("pipeline")).get("id")).intValue(), is(4));
         assertThat(third.isEmpty(), is(true));

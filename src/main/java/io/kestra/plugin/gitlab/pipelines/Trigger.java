@@ -92,7 +92,6 @@ import static io.kestra.core.models.triggers.StatefulTriggerService.*;
 public class Trigger extends AbstractTrigger implements PollingTriggerInterface, TriggerOutput<Trigger.Output>, StatefulTriggerInterface {
     static final int MAX_PIPELINES = 100;
     static final Duration UPDATED_AFTER_OVERLAP = Duration.ofMinutes(1);
-    /** State entry marking that the first poll already recorded the existing pipelines. */
     static final String SEEDED_KEY = "__seeded__";
     private static final int DEFAULT_MAX_PIPELINES = 20;
 
@@ -185,10 +184,11 @@ public class Trigger extends AbstractTrigger implements PollingTriggerInterface,
     @Schema(
         title = "State TTL",
         description = """
-            How long the pipelines already seen are remembered."""
+            How long the pipelines already seen are remembered. Defaults to `P7D`; the `updated_after` watermark \n            already keeps older pipelines from being listed again, so the state only needs to cover recent ones."""
     )
+    @Builder.Default
     @PluginProperty(group = "advanced")
-    private Property<Duration> stateTtl;
+    private Property<Duration> stateTtl = Property.ofValue(Duration.ofDays(7));
 
     @Override
     public Optional<Execution> evaluate(ConditionContext conditionContext, TriggerContext context) throws Exception {

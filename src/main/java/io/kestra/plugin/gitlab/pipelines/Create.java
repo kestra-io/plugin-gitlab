@@ -226,9 +226,6 @@ public class Create extends AbstractPipelineTask implements RunnableTask<Pipelin
         return current;
     }
 
-    /**
-     * Runs the cancel hook unless {@link #kill()} already took it, then builds the error thrown after a kill.
-     */
     private IllegalStateException killedWhile(Pipeline pipeline, String phase) {
         var cancel = cancelOnKill.getAndSet(null);
         if (cancel != null) {

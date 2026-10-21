@@ -34,10 +34,7 @@ public abstract class AbstractPipelineTask extends AbstractGitLabTask {
         }, method, endpoint));
     }
 
-    /**
-     * Reads the body as text first: the HTTP client fails with an opaque Jackson error on an empty 2xx body,
-     * so the check has to happen before deserialization.
-     */
+    // Read as text first: the HTTP client fails with an opaque Jackson error on an empty 2xx body.
     static <T> T readBody(HttpResponse<String> response, TypeReference<T> type, String method, String endpoint) throws IOException {
         var body = response.getBody();
         if (body == null || body.isBlank()) {
