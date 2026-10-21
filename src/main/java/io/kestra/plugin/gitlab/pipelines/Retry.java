@@ -1,15 +1,11 @@
 package io.kestra.plugin.gitlab.pipelines;
 
-import io.kestra.core.http.client.HttpClient;
 import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Plugin;
-import io.kestra.core.models.annotations.PluginProperty;
-import io.kestra.core.models.property.Property;
 import io.kestra.core.models.tasks.RunnableTask;
 import io.kestra.core.runners.RunContext;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -20,7 +16,8 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @Schema(
     title = "Retry a GitLab CI/CD pipeline",
-    description = "Retries the failed or canceled jobs of a pipeline and returns the pipeline as GitLab reports it after the request."
+    description = """
+        Retries the failed or canceled jobs of a pipeline and returns the pipeline as GitLab reports it after the request."""
 )
 @Plugin(
     examples = {
@@ -45,19 +42,11 @@ import lombok.experimental.SuperBuilder;
         )
     }
 )
-public class Retry extends AbstractPipelineTask implements RunnableTask<Pipeline> {
-    @Schema(title = "Pipeline ID", description = "Global ID of the pipeline (the `id` output of `Create` or `List`, not the project-scoped `iid`).")
-    @NotNull
-    @PluginProperty(group = "main")
-    private Property<Long> pipelineId;
-
+public class Retry extends AbstractPipelineActionTask implements RunnableTask<Pipeline> {
     @Override
     public Pipeline run(RunContext runContext) throws Exception {
-        Long rPipelineId = runContext.render(this.pipelineId).as(Long.class).orElseThrow();
-        try (HttpClient client = httpClient(runContext)) {
-            Pipeline pipeline = pipelineRequest(runContext, client, "POST", "pipelines/" + rPipelineId + "/retry", null);
-            runContext.logger().info("Retried GitLab pipeline {} (status '{}')", pipeline.getId(), pipeline.getStatus());
-            return pipeline;
-        }
+        var pipeline = pipelineAction(runContext, "POST", "/retry");
+        runContext.logger().info("Retried GitLab pipeline {} (status '{}')", pipeline.getId(), pipeline.getStatus());
+        return pipeline;
     }
 }

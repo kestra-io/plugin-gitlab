@@ -12,6 +12,7 @@ import com.github.tomakehurst.wiremock.stubbing.Scenario;
 
 import io.kestra.core.models.property.Property;
 import io.kestra.core.runners.RunContextFactory;
+import io.kestra.core.utils.IdUtils;
 import io.kestra.plugin.gitlab.WireMockTest;
 
 import jakarta.inject.Inject;
@@ -39,20 +40,31 @@ class CreateTest extends WireMockTest {
 
     private Create.CreateBuilder<?, ?> task() {
         return Create.builder()
-            .id("create")
+            .id(IdUtils.create())
             .type(Create.class.getName())
             .url(Property.ofValue(wireMock.baseUrl()))
             .token(Property.ofValue("test-token"))
             .projectId(Property.ofValue("12345"))
             .ref(Property.ofValue("main"))
-            .pollInterval(Property.ofValue(Duration.ofMillis(20)));
+            .pollInterval(Property.ofValue(Create.MIN_POLL_INTERVAL));
+    }
+
+    private CompletableFuture<Pipeline> runAsync(Create task) {
+        return CompletableFuture.supplyAsync(() ->
+        {
+            try {
+                return task.run(runContextFactory.of());
+            } catch (Exception e) {
+                throw new IllegalStateException(e);
+            }
+        });
     }
 
     @Test
     void shouldCreatePipelineWithVariablesWithoutWaiting() throws Exception {
         wireMock.stubFor(post(urlEqualTo(PIPELINES)).willReturn(okJson(pipeline("created"))));
 
-        Pipeline output = task()
+        var output = task()
             .variables(Property.ofValue(Map.of("DEPLOY_ENV", "staging")))
             .build()
             .run(runContextFactory.of());
@@ -83,7 +95,7 @@ class CreateTest extends WireMockTest {
                 .willReturn(okJson(pipeline("success")))
         );
 
-        Pipeline output = task().wait(Property.ofValue(true)).build().run(runContextFactory.of());
+        var output = task().wait(Property.ofValue(true)).build().run(runContextFactory.of());
 
         assertThat(output.getStatus(), is("success"));
         wireMock.verify(2, getRequestedFor(urlEqualTo(PIPELINE_42)));
@@ -94,7 +106,7 @@ class CreateTest extends WireMockTest {
         wireMock.stubFor(post(urlEqualTo(PIPELINES)).willReturn(okJson(pipeline("running"))));
         wireMock.stubFor(get(urlEqualTo(PIPELINE_42)).willReturn(okJson(pipeline("failed"))));
 
-        IllegalStateException e = assertThrows(IllegalStateException.class, () -> task().wait(Property.ofValue(true)).build().run(runContextFactory.of()));
+        var e = assertThrows(IllegalStateException.class, () -> task().wait(Property.ofValue(true)).build().run(runContextFactory.of()));
 
         assertThat(e.getMessage(), containsString("finished with status 'failed'"));
     }
@@ -121,23 +133,77 @@ class CreateTest extends WireMockTest {
         wireMock.stubFor(post(urlEqualTo(PIPELINES)).willReturn(okJson(pipeline("running"))));
         wireMock.stubFor(get(urlEqualTo(PIPELINE_42)).willReturn(okJson(pipeline("running"))));
         wireMock.stubFor(post(urlEqualTo(PIPELINE_42 + "/cancel")).willReturn(okJson(pipeline("canceling"))));
-        Create task = task().wait(Property.ofValue(true)).build();
+        var task = task().wait(Property.ofValue(true)).build();
 
-        CompletableFuture<Pipeline> running = CompletableFuture.supplyAsync(() ->
-        {
-            try {
-                return task.run(runContextFactory.of());
-            } catch (Exception e) {
-                throw new IllegalStateException(e);
-            }
-        });
+        var running = runAsync(task);
         while (wireMock.findAll(getRequestedFor(urlEqualTo(PIPELINE_42))).isEmpty()) {
             Thread.sleep(10);
         }
         task.kill();
 
-        Exception e = assertThrows(Exception.class, () -> running.get(5, TimeUnit.SECONDS));
+        var e = assertThrows(Exception.class, () -> running.get(5, TimeUnit.SECONDS));
         assertThat(e.getMessage(), containsString("killed"));
         wireMock.verify(1, postRequestedFor(urlEqualTo(PIPELINE_42 + "/cancel")));
+    }
+
+    @Test
+    void shouldCancelThePipelineWhenKilledWhileItIsBeingCreated() throws Exception {
+        wireMock.stubFor(post(urlEqualTo(PIPELINES)).willReturn(okJson(pipeline("created")).withFixedDelay(1500)));
+        wireMock.stubFor(get(urlEqualTo(PIPELINE_42)).willReturn(okJson(pipeline("running"))));
+        wireMock.stubFor(post(urlEqualTo(PIPELINE_42 + "/cancel")).willReturn(okJson(pipeline("canceling"))));
+        var task = task().wait(Property.ofValue(true)).build();
+
+        var running = runAsync(task);
+        Thread.sleep(500);
+        task.kill();
+
+        var e = assertThrows(Exception.class, () -> running.get(10, TimeUnit.SECONDS));
+        assertThat(e.getMessage(), containsString("killed while GitLab pipeline 42 was being created"));
+        wireMock.verify(1, postRequestedFor(urlEqualTo(PIPELINE_42 + "/cancel")));
+        wireMock.verify(0, getRequestedFor(urlEqualTo(PIPELINE_42)));
+    }
+
+    @Test
+    void shouldRejectAPollIntervalBelowOneSecond() {
+        var e = assertThrows(
+            IllegalArgumentException.class, () -> task()
+                .wait(Property.ofValue(true))
+                .pollInterval(Property.ofValue(Duration.ofMillis(500)))
+                .build()
+                .run(runContextFactory.of())
+        );
+
+        assertThat(e.getMessage(), containsString("`pollInterval` must be at least PT1S"));
+        wireMock.verify(0, postRequestedFor(urlEqualTo(PIPELINES)));
+    }
+
+    @Test
+    void shouldRejectANonPositiveMaxWaitDuration() {
+        var e = assertThrows(
+            IllegalArgumentException.class, () -> task()
+                .maxWaitDuration(Property.ofValue(Duration.ZERO))
+                .build()
+                .run(runContextFactory.of())
+        );
+
+        assertThat(e.getMessage(), containsString("`maxWaitDuration` must be a positive duration"));
+    }
+
+    @Test
+    void shouldNameTheMissingRef() {
+        var e = assertThrows(IllegalArgumentException.class, () -> task().ref(Property.ofValue("")).build().run(runContextFactory.of()));
+
+        assertThat(e.getMessage(), containsString("`ref` is required"));
+        wireMock.verify(0, postRequestedFor(urlEqualTo(PIPELINES)));
+    }
+
+    @Test
+    void shouldFailWithAnActionableMessageOnAnEmptyBody() {
+        wireMock.stubFor(post(urlEqualTo(PIPELINES)).willReturn(aResponse().withStatus(201)));
+
+        var e = assertThrows(IllegalStateException.class, () -> task().build().run(runContextFactory.of()));
+
+        assertThat(e.getMessage(), containsString("Empty response from the GitLab API for POST /api/v4/projects/12345/pipeline"));
+        assertThat(e.getMessage(), containsString("`apiPath`"));
     }
 }

@@ -64,7 +64,8 @@ public abstract class AbstractGitLabTask extends Task {
 
     protected HttpRequest.HttpRequestBuilder authenticatedRequestBuilder(String endpoint, RunContext runContext) throws IllegalVariableEvaluationException {
         String baseUrl = runContext.render(this.url).as(String.class).orElse("https://gitlab.com");
-        String renderedToken = runContext.render(this.token).as(String.class).orElseThrow();
+        String renderedToken = runContext.render(this.token).as(String.class)
+            .orElseThrow(() -> new IllegalArgumentException("`token` is required: set a GitLab access token."));
         String fullUrl = baseUrl + endpoint;
         return HttpRequest.builder()
             .uri(URI.create(fullUrl))
@@ -74,7 +75,8 @@ public abstract class AbstractGitLabTask extends Task {
 
     protected String buildApiEndpoint(String resource, RunContext runContext) throws IllegalVariableEvaluationException {
         String renderedApiPath = runContext.render(this.apiPath).as(String.class).orElse("/api/v4/projects");
-        String renderedProjectId = runContext.render(this.getProjectId()).as(String.class).orElseThrow();
+        String renderedProjectId = runContext.render(this.getProjectId()).as(String.class)
+            .orElseThrow(() -> new IllegalArgumentException("`projectId` is required: set a numeric project ID or a URL-encoded project path."));
         return renderedApiPath + "/" + renderedProjectId + "/" + resource;
     }
 

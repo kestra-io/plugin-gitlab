@@ -16,31 +16,60 @@ public class Pipeline implements Output {
     static final Set<String> TERMINAL_STATUSES = Set.of("success", "failed", "canceled", "skipped", "manual");
     static final Set<String> FAILED_STATUSES = Set.of("failed", "canceled");
 
-    @Schema(title = "Pipeline ID", description = "Global ID of the pipeline, used in the pipeline API endpoints.")
+    @Schema(
+        title = "Pipeline ID",
+        description = """
+            Global ID of the pipeline, used in the pipeline API endpoints."""
+    )
     private final Long id;
 
-    @Schema(title = "Pipeline IID", description = "ID of the pipeline within its project, as shown in the GitLab UI (`#12`).")
+    @Schema(
+        title = "Pipeline IID",
+        description = """
+            ID of the pipeline within its project, as shown in the GitLab UI (`#12`)."""
+    )
     private final Long iid;
 
-    @Schema(title = "Project ID", description = "Numeric ID of the project the pipeline belongs to.")
+    @Schema(
+        title = "Project ID",
+        description = """
+            Numeric ID of the project the pipeline belongs to."""
+    )
     private final Long projectId;
 
     @Schema(
         title = "Pipeline status",
-        description = "One of `created`, `waiting_for_resource`, `preparing`, `pending`, `running`, `canceling`, `success`, `failed`, `canceled`, `skipped`, `manual` or `scheduled`."
+        description = """
+            One of `created`, `waiting_for_resource`, `preparing`, `pending`, `running`, `canceling`, `success`, `failed`, `canceled`, `skipped`, `manual` or `scheduled`."""
     )
     private final String status;
 
-    @Schema(title = "Git ref", description = "Branch or tag the pipeline runs for.")
+    @Schema(
+        title = "Git ref",
+        description = """
+            Branch or tag the pipeline runs for."""
+    )
     private final String ref;
 
-    @Schema(title = "Commit SHA", description = "SHA of the commit the pipeline runs for.")
+    @Schema(
+        title = "Commit SHA",
+        description = """
+            SHA of the commit the pipeline runs for."""
+    )
     private final String sha;
 
-    @Schema(title = "Pipeline source", description = "What started the pipeline, for example `push`, `web`, `api`, `schedule` or `merge_request_event`.")
+    @Schema(
+        title = "Pipeline source",
+        description = """
+            What started the pipeline, for example `push`, `web`, `api`, `schedule` or `merge_request_event`."""
+    )
     private final String source;
 
-    @Schema(title = "Pipeline URL", description = "Link to the pipeline in the GitLab UI.")
+    @Schema(
+        title = "Pipeline URL",
+        description = """
+            Link to the pipeline in the GitLab UI."""
+    )
     private final String webUrl;
 
     @Schema(title = "Creation time")
@@ -49,13 +78,25 @@ public class Pipeline implements Output {
     @Schema(title = "Last update time")
     private final Instant updatedAt;
 
-    @Schema(title = "Start time", description = "Empty while the pipeline has not started.")
+    @Schema(
+        title = "Start time",
+        description = """
+            Empty while the pipeline has not started."""
+    )
     private final Instant startedAt;
 
-    @Schema(title = "Finish time", description = "Empty while the pipeline is still running.")
+    @Schema(
+        title = "Finish time",
+        description = """
+            Empty while the pipeline is still running."""
+    )
     private final Instant finishedAt;
 
-    @Schema(title = "Duration in seconds", description = "Time the pipeline spent running; empty while it is still running.")
+    @Schema(
+        title = "Duration in seconds",
+        description = """
+            Time the pipeline spent running; empty while it is still running."""
+    )
     private final Integer duration;
 
     static Pipeline of(Map<String, Object> body) {

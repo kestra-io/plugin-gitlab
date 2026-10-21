@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import io.kestra.core.models.property.Property;
 import io.kestra.core.runners.RunContextFactory;
+import io.kestra.core.utils.IdUtils;
 import io.kestra.plugin.gitlab.WireMockTest;
 
 import jakarta.inject.Inject;
@@ -13,6 +14,7 @@ import jakarta.inject.Inject;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class PipelineActionsTest extends WireMockTest {
     private static final String PIPELINE_42 = "/api/v4/projects/group%2Fproject/pipelines/42";
@@ -29,8 +31,8 @@ class PipelineActionsTest extends WireMockTest {
              "started_at":"2026-10-19T10:00:05.000Z","finished_at":"2026-10-19T10:04:59.000Z","duration":294}
             """)));
 
-        Pipeline pipeline = Get.builder()
-            .id("get")
+        var pipeline = Get.builder()
+            .id(IdUtils.create())
             .type(Get.class.getName())
             .url(Property.ofValue(wireMock.baseUrl()))
             .token(Property.ofValue("test-token"))
@@ -52,8 +54,8 @@ class PipelineActionsTest extends WireMockTest {
         wireMock.stubFor(post(urlEqualTo(PIPELINE_42 + "/cancel")).willReturn(okJson("{\"id\":42,\"status\":\"canceled\"}")));
         wireMock.stubFor(post(urlEqualTo(PIPELINE_42 + "/retry")).willReturn(okJson("{\"id\":42,\"status\":\"pending\"}")));
 
-        Pipeline canceled = Cancel.builder()
-            .id("cancel")
+        var canceled = Cancel.builder()
+            .id(IdUtils.create())
             .type(Cancel.class.getName())
             .url(Property.ofValue(wireMock.baseUrl()))
             .token(Property.ofValue("test-token"))
@@ -61,8 +63,8 @@ class PipelineActionsTest extends WireMockTest {
             .pipelineId(Property.ofExpression("{{ pipeline }}"))
             .build()
             .run(runContextFactory.of(java.util.Map.of("pipeline", 42)));
-        Pipeline retried = Retry.builder()
-            .id("retry")
+        var retried = Retry.builder()
+            .id(IdUtils.create())
             .type(Retry.class.getName())
             .url(Property.ofValue(wireMock.baseUrl()))
             .token(Property.ofValue("test-token"))
@@ -73,5 +75,56 @@ class PipelineActionsTest extends WireMockTest {
 
         assertThat(canceled.getStatus(), is("canceled"));
         assertThat(retried.getStatus(), is("pending"));
+    }
+
+    @Test
+    void shouldNameTheMissingPipelineId() {
+        var e = assertThrows(
+            IllegalArgumentException.class, () -> Retry.builder()
+                .id(IdUtils.create())
+                .type(Retry.class.getName())
+                .url(Property.ofValue(wireMock.baseUrl()))
+                .token(Property.ofValue("test-token"))
+                .projectId(Property.ofValue("group%2Fproject"))
+                .build()
+                .run(runContextFactory.of())
+        );
+
+        assertThat(e.getMessage(), containsString("`pipelineId` is required"));
+    }
+
+    @Test
+    void shouldNameTheMissingProjectId() {
+        var e = assertThrows(
+            IllegalArgumentException.class, () -> Get.builder()
+                .id(IdUtils.create())
+                .type(Get.class.getName())
+                .url(Property.ofValue(wireMock.baseUrl()))
+                .token(Property.ofValue("test-token"))
+                .pipelineId(Property.ofValue(42L))
+                .build()
+                .run(runContextFactory.of())
+        );
+
+        assertThat(e.getMessage(), containsString("`projectId` is required"));
+    }
+
+    @Test
+    void shouldFailWithAnActionableMessageOnAnEmptyBody() {
+        wireMock.stubFor(get(urlEqualTo(PIPELINE_42)).willReturn(aResponse().withStatus(200)));
+
+        var e = assertThrows(
+            IllegalStateException.class, () -> Get.builder()
+                .id(IdUtils.create())
+                .type(Get.class.getName())
+                .url(Property.ofValue(wireMock.baseUrl()))
+                .token(Property.ofValue("test-token"))
+                .projectId(Property.ofValue("group%2Fproject"))
+                .pipelineId(Property.ofValue(42L))
+                .build()
+                .run(runContextFactory.of())
+        );
+
+        assertThat(e.getMessage(), containsString("Empty response from the GitLab API for GET " + PIPELINE_42));
     }
 }
