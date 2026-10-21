@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import io.kestra.core.models.property.Property;
 import io.kestra.core.runners.RunContext;
 import io.kestra.core.runners.RunContextFactory;
+import io.kestra.core.utils.IdUtils;
 import io.kestra.plugin.gitlab.WireMockTest;
 
 import jakarta.inject.Inject;
@@ -129,5 +130,34 @@ public class CreateTest extends WireMockTest {
         assertThat(runOutput.getIssueId(), is("2"));
         assertThat(runOutput.getIssueIid(), is(nullValue()));
         assertThat(runOutput.getWebUrl(), is("https://gitlab.example.com/test/issues/2"));
+    }
+
+    @Test
+    void testCreateIssueWithProjectPath() throws Exception {
+        wireMock.stubFor(
+            post(urlEqualTo("/api/v4/projects/gitlab-org%2Fgitlab/issues"))
+                .withRequestBody(equalToJson("{\"title\":\"Test issue\",\"description\":\"This is a test issue\"}"))
+                .willReturn(
+                    aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("{\"id\":987,\"iid\":42,\"project_id\":278964,\"title\":\"Test issue\",\"web_url\":\"https://gitlab.com/gitlab-org/gitlab/issues/1\"}")
+                )
+        );
+
+        var runContext = runContextFactory.of();
+
+        var task = Create.builder()
+            .id("create-" + IdUtils.create())
+            .projectId(Property.ofValue("gitlab-org/gitlab"))
+            .token(Property.ofValue("test-token"))
+            .url(Property.ofValue(wireMock.baseUrl()))
+            .title(Property.ofValue("Test issue"))
+            .issueDescription(Property.ofValue("This is a test issue"))
+            .build();
+
+        var runOutput = task.run(runContext);
+
+        assertThat(runOutput.getIssueId(), is("987"));
+        wireMock.verify(postRequestedFor(urlEqualTo("/api/v4/projects/gitlab-org%2Fgitlab/issues")));
     }
 }

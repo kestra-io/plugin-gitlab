@@ -1,6 +1,10 @@
 package io.kestra.plugin.gitlab;
 
 import java.net.URI;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+
+import com.google.common.net.UrlEscapers;
 
 import io.kestra.core.exceptions.IllegalVariableEvaluationException;
 import io.kestra.core.http.HttpRequest;
@@ -42,7 +46,9 @@ public abstract class AbstractGitLabTask extends Task {
 
     @Schema(
         title = "Project ID or path",
-        description = "Numeric project ID or URL-encoded project path rendered from the context to build API endpoints."
+        description = """
+            Numeric project ID or project path (`group/project`). Encoded as one URL segment, including a path that is already percent-encoded.
+            """
     )
     @NotNull
     @PluginProperty(group = "destination")
@@ -73,9 +79,21 @@ public abstract class AbstractGitLabTask extends Task {
     }
 
     protected String buildApiEndpoint(String resource, RunContext runContext) throws IllegalVariableEvaluationException {
-        String renderedApiPath = runContext.render(this.apiPath).as(String.class).orElse("/api/v4/projects");
-        String renderedProjectId = runContext.render(this.getProjectId()).as(String.class).orElseThrow();
-        return renderedApiPath + "/" + renderedProjectId + "/" + resource;
+        var rApiPath = runContext.render(this.apiPath).as(String.class).orElse("/api/v4/projects");
+        var rProjectId = runContext.render(this.getProjectId()).as(String.class)
+            .orElseThrow(() -> new IllegalVariableEvaluationException("Project id is required. Set projectId to a numeric id or a group/project path."));
+        // Decode first so an already encoded %2F becomes a slash again, then escape the whole value as one segment.
+        final String decodedProjectId;
+        try {
+            decodedProjectId = URLDecoder.decode(rProjectId, StandardCharsets.UTF_8);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalVariableEvaluationException("projectId '%s' contains an invalid percent-escape. Set a numeric id or a group/project path.".formatted(rProjectId));
+        }
+        if (decodedProjectId.isBlank() || ".".equals(decodedProjectId) || "..".equals(decodedProjectId)) {
+            throw new IllegalVariableEvaluationException("projectId '%s' is not a numeric id or a group/project path.".formatted(rProjectId));
+        }
+        var encodedProjectId = UrlEscapers.urlPathSegmentEscaper().escape(decodedProjectId);
+        return rApiPath + "/" + encodedProjectId + "/" + resource;
     }
 
 }
