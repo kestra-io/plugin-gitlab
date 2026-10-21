@@ -184,7 +184,9 @@ public class Trigger extends AbstractTrigger implements PollingTriggerInterface,
     @Schema(
         title = "State TTL",
         description = """
-            How long the pipelines already seen are remembered. Defaults to `P7D`; the `updated_after` watermark \n            already keeps older pipelines from being listed again, so the state only needs to cover recent ones."""
+            How long the pipelines already seen are remembered. Defaults to `P7D` and must be at least twice the polling `interval`, \
+            otherwise the state expires between two polls and new pipelines are never reported. The `updated_after` watermark \
+            already keeps older pipelines from being listed again, so the state only needs to cover recent ones."""
     )
     @Builder.Default
     @PluginProperty(group = "advanced")
@@ -195,6 +197,11 @@ public class Trigger extends AbstractTrigger implements PollingTriggerInterface,
         var runContext = conditionContext.getRunContext();
         var rStateKey = runContext.render(stateKey).as(String.class).orElse(StatefulTriggerService.defaultKey(context.getNamespace(), context.getFlowId(), id));
         var rTtl = runContext.render(stateTtl).as(Duration.class);
+        if (rTtl.isPresent() && rTtl.get().compareTo(interval.multipliedBy(2)) < 0) {
+            throw new IllegalArgumentException(
+                "`stateTtl` must be at least twice the polling `interval` (%s), got %s.".formatted(interval.multipliedBy(2), rTtl.get())
+            );
+        }
         var rStatuses = runContext.render(statuses).asList(PipelineStatus.class).stream().map(PipelineStatus::apiValue).toList();
         var rOn = runContext.render(on).as(On.class).orElse(On.CREATE);
         var rMaxPipelines = AbstractPipelineTask.boundedInt(

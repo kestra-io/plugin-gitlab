@@ -123,4 +123,15 @@ class TriggerTest extends WireMockTest {
         }
         wireMock.verify(0, getRequestedFor(urlPathEqualTo(PIPELINES)));
     }
+
+    @Test
+    void shouldRejectAStateTtlShorterThanTwoPollingIntervals() throws Exception {
+        var trigger = trigger().interval(Duration.ofSeconds(60)).stateTtl(Property.ofValue(Duration.ofMinutes(1))).build();
+        var context = TestsUtils.mockTrigger(runContextFactory, trigger);
+
+        var e = assertThrows(IllegalArgumentException.class, () -> trigger.evaluate(context.getKey(), context.getValue()));
+
+        assertThat(e.getMessage(), containsString("`stateTtl` must be at least twice the polling `interval` (PT2M), got PT1M."));
+        wireMock.verify(0, getRequestedFor(urlPathEqualTo(PIPELINES)));
+    }
 }
