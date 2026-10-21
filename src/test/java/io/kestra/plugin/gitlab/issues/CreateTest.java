@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import io.kestra.core.models.property.Property;
 import io.kestra.core.runners.RunContext;
 import io.kestra.core.runners.RunContextFactory;
+import io.kestra.core.utils.IdUtils;
 import io.kestra.plugin.gitlab.WireMockTest;
 
 import jakarta.inject.Inject;
@@ -143,10 +144,10 @@ public class CreateTest extends WireMockTest {
                 )
         );
 
-        RunContext runContext = runContextFactory.of();
+        var runContext = runContextFactory.of();
 
-        Create task = Create.builder()
-            .id("create-issue")
+        var task = Create.builder()
+            .id("create-" + IdUtils.create())
             .projectId(Property.ofValue("gitlab-org/gitlab"))
             .token(Property.ofValue("test-token"))
             .url(Property.ofValue(wireMock.baseUrl()))
@@ -154,7 +155,7 @@ public class CreateTest extends WireMockTest {
             .issueDescription(Property.ofValue("This is a test issue"))
             .build();
 
-        Create.Output runOutput = task.run(runContext);
+        var runOutput = task.run(runContext);
 
         assertThat(runOutput.getIssueId(), is("987"));
         wireMock.verify(postRequestedFor(urlEqualTo("/api/v4/projects/gitlab-org%2Fgitlab/issues")));

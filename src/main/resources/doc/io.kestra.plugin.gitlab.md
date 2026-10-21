@@ -4,7 +4,7 @@ Create issues and merge requests, and search issues in GitLab from Kestra flows.
 
 ## Authentication
 
-Set `token` to a GitLab personal, project, or group access token with scopes covering the operations you need. `url` defaults to `https://gitlab.com` — set it to your instance URL for self-hosted GitLab. Set `projectId` to the numeric project ID or a `group/project` path. A raw path is encoded before it is placed in the API URL. A path that already contains a percent-escape is left unchanged. Store `token` in a [secret](https://kestra.io/docs/concepts/secret) and set all three on each task.
+Set `token` to a GitLab personal, project, or group access token with scopes covering the operations you need. `url` defaults to `https://gitlab.com` — set it to your instance URL for self-hosted GitLab. Set `projectId` to the numeric project ID or a `group/project` path. The value is sent as one URL segment; an already encoded path such as `group%2Fproject` also works. Store `token` in a [secret](https://kestra.io/docs/concepts/secret) and set all three on each task.
 
 ## Tasks
 
