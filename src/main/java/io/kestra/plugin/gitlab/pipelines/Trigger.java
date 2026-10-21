@@ -247,8 +247,7 @@ public class Trigger extends AbstractTrigger implements PollingTriggerInterface,
             }
         }
 
-        // computeAndUpdateState keeps the old lastSeenAt for a pipeline that does not fire, so an entry could expire
-        // while the pipeline is still listed and fire again; refresh every pipeline this poll listed.
+        // computeAndUpdateState keeps an unchanged entry's lastSeenAt, so refresh listed ones or they expire and refire
         var polledAt = Instant.now();
         for (var pipeline : listed) {
             var key = String.valueOf(pipeline.getId());
