@@ -5,9 +5,11 @@ import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.kestra.core.exceptions.IllegalVariableEvaluationException;
 import io.kestra.core.models.property.Property;
 import io.kestra.core.runners.RunContext;
 import io.kestra.core.runners.RunContextFactory;
+import io.kestra.core.utils.IdUtils;
 import io.kestra.plugin.gitlab.WireMockTest;
 
 import jakarta.inject.Inject;
@@ -100,6 +102,173 @@ public class SearchTest extends WireMockTest {
         RunContext runContext = runContextFactory.of();
 
         assertThrows(Exception.class, () -> task.run(runContext));
+    }
+
+    @Test
+    void testSearchIssuesWithProjectPath() throws Exception {
+        wireMock.stubFor(
+            get(urlEqualTo("/api/v4/projects/gitlab-org%2Fgitlab/issues?search=bug&state=opened"))
+                .willReturn(
+                    aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("[{\"id\":1,\"iid\":1,\"project_id\":278964,\"title\":\"bug\",\"web_url\":\"https://gitlab.com/gitlab-org/gitlab/issues/1\"}]")
+                )
+        );
+
+        var task = Search.builder()
+            .id("search-" + IdUtils.create())
+            .projectId(Property.ofValue("gitlab-org/gitlab"))
+            .token(Property.ofValue("test-token"))
+            .url(Property.ofValue(wireMock.baseUrl()))
+            .search(Property.ofValue("bug"))
+            .build();
+
+        var runContext = runContextFactory.of();
+
+        var runOutput = task.run(runContext);
+
+        assertThat(runOutput.getCount(), is(1));
+        wireMock.verify(getRequestedFor(urlEqualTo("/api/v4/projects/gitlab-org%2Fgitlab/issues?search=bug&state=opened")));
+    }
+
+    @Test
+    void testSearchIssuesWithEncodedProjectPath() throws Exception {
+        wireMock.stubFor(
+            get(urlEqualTo("/api/v4/projects/gitlab-org%2Fgitlab/issues?search=bug&state=opened"))
+                .willReturn(
+                    aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("[{\"id\":1,\"iid\":1,\"project_id\":278964,\"title\":\"bug\",\"web_url\":\"https://gitlab.com/gitlab-org/gitlab/issues/1\"}]")
+                )
+        );
+
+        var task = Search.builder()
+            .id("search-" + IdUtils.create())
+            .projectId(Property.ofValue("gitlab-org%2Fgitlab"))
+            .token(Property.ofValue("test-token"))
+            .url(Property.ofValue(wireMock.baseUrl()))
+            .search(Property.ofValue("bug"))
+            .build();
+
+        var runContext = runContextFactory.of();
+
+        var runOutput = task.run(runContext);
+
+        assertThat(runOutput.getCount(), is(1));
+        wireMock.verify(getRequestedFor(urlEqualTo("/api/v4/projects/gitlab-org%2Fgitlab/issues?search=bug&state=opened")));
+    }
+
+    @Test
+    void testSearchIssuesWithNumericProjectId() throws Exception {
+        wireMock.stubFor(
+            get(urlEqualTo("/api/v4/projects/278964/issues?search=bug&state=opened"))
+                .willReturn(
+                    aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("[{\"id\":1,\"iid\":1,\"project_id\":278964,\"title\":\"bug\",\"web_url\":\"https://gitlab.com/gitlab-org/gitlab/issues/1\"}]")
+                )
+        );
+
+        var task = Search.builder()
+            .id("search-" + IdUtils.create())
+            .projectId(Property.ofValue("278964"))
+            .token(Property.ofValue("test-token"))
+            .url(Property.ofValue(wireMock.baseUrl()))
+            .search(Property.ofValue("bug"))
+            .build();
+
+        var runContext = runContextFactory.of();
+
+        var runOutput = task.run(runContext);
+
+        assertThat(runOutput.getCount(), is(1));
+        wireMock.verify(getRequestedFor(urlEqualTo("/api/v4/projects/278964/issues?search=bug&state=opened")));
+    }
+
+    @Test
+    void testSearchIssuesWithNestedProjectPath() throws Exception {
+        wireMock.stubFor(
+            get(urlEqualTo("/api/v4/projects/group%2Fsub%2Fproject/issues?search=bug&state=opened"))
+                .willReturn(
+                    aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("[{\"id\":1,\"iid\":1,\"project_id\":1,\"title\":\"bug\",\"web_url\":\"https://gitlab.example.com/group/sub/project/issues/1\"}]")
+                )
+        );
+
+        var task = Search.builder()
+            .id("search-" + IdUtils.create())
+            .projectId(Property.ofValue("group/sub/project"))
+            .token(Property.ofValue("test-token"))
+            .url(Property.ofValue(wireMock.baseUrl()))
+            .search(Property.ofValue("bug"))
+            .build();
+
+        var runContext = runContextFactory.of();
+
+        var runOutput = task.run(runContext);
+
+        assertThat(runOutput.getCount(), is(1));
+        wireMock.verify(getRequestedFor(urlEqualTo("/api/v4/projects/group%2Fsub%2Fproject/issues?search=bug&state=opened")));
+    }
+
+    @Test
+    void testSearchIssuesWithPartlyEncodedProjectPath() throws Exception {
+        wireMock.stubFor(
+            get(urlEqualTo("/api/v4/projects/xA%2F..%2F..%2F..%2Fuser%3Fa=/issues?search=bug&state=opened"))
+                .willReturn(
+                    aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("[{\"id\":1,\"iid\":1,\"project_id\":1,\"title\":\"bug\",\"web_url\":\"https://gitlab.example.com/issues/1\"}]")
+                )
+        );
+
+        var task = Search.builder()
+            .id("search-" + IdUtils.create())
+            .projectId(Property.ofValue("x%41/../../../user?a="))
+            .token(Property.ofValue("test-token"))
+            .url(Property.ofValue(wireMock.baseUrl()))
+            .search(Property.ofValue("bug"))
+            .build();
+
+        var runContext = runContextFactory.of();
+
+        var runOutput = task.run(runContext);
+
+        assertThat(runOutput.getCount(), is(1));
+        wireMock.verify(getRequestedFor(urlEqualTo("/api/v4/projects/xA%2F..%2F..%2F..%2Fuser%3Fa=/issues?search=bug&state=opened")));
+    }
+
+    @Test
+    void testRejectsAnInvalidPercentEscape() {
+        var task = Search.builder()
+            .id("search-" + IdUtils.create())
+            .projectId(Property.ofValue("100%"))
+            .token(Property.ofValue("test-token"))
+            .url(Property.ofValue("https://gitlab.example.com"))
+            .search(Property.ofValue("bug"))
+            .build();
+
+        var thrown = assertThrows(IllegalVariableEvaluationException.class, () -> task.run(runContextFactory.of()));
+
+        assertThat(thrown.getMessage(), is("projectId '100%' contains an invalid percent-escape. Set a numeric id or a group/project path."));
+    }
+
+    @Test
+    void testRejectsAProjectIdThatLeavesTheProject() {
+        for (var projectId : new String[] {".", "..", "%2E%2E", " "}) {
+            var task = Search.builder()
+                .id("search-" + IdUtils.create())
+                .projectId(Property.ofValue(projectId))
+                .token(Property.ofValue("test-token"))
+                .url(Property.ofValue("https://gitlab.example.com"))
+                .search(Property.ofValue("bug"))
+                .build();
+
+            var thrown = assertThrows(IllegalVariableEvaluationException.class, () -> task.run(runContextFactory.of()));
+
+            assertThat(thrown.getMessage(), is("projectId '%s' is not a numeric id or a group/project path.".formatted(projectId)));
+        }
     }
 
 }
