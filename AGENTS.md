@@ -3,7 +3,7 @@
 ## What
 
 - Provides plugin components under `io.kestra.plugin.gitlab`.
-- Includes classes such as `Create`, `Search`, `Create`.
+- Includes classes such as `Create`, `Search`, `Create`, and the CI/CD pipeline tasks `Create`, `Get`, `List`, `Cancel`, `Retry` with the `Trigger` polling trigger.
 
 ## Why
 
@@ -28,13 +28,23 @@ Infrastructure dependencies (Docker Compose services):
 - `io.kestra.plugin.gitlab.issues.Create`
 - `io.kestra.plugin.gitlab.issues.Search`
 - `io.kestra.plugin.gitlab.mergerequests.Create`
+- `io.kestra.plugin.gitlab.pipelines.Create`
+- `io.kestra.plugin.gitlab.pipelines.Get`
+- `io.kestra.plugin.gitlab.pipelines.List`
+- `io.kestra.plugin.gitlab.pipelines.Cancel`
+- `io.kestra.plugin.gitlab.pipelines.Retry`
+- `io.kestra.plugin.gitlab.pipelines.Trigger`
 
 ### Project Structure
 
 ```
 plugin-gitlab/
+├── src/main/java/io/kestra/plugin/gitlab/issues/
 ├── src/main/java/io/kestra/plugin/gitlab/mergerequests/
+├── src/main/java/io/kestra/plugin/gitlab/pipelines/
+├── src/test/java/io/kestra/plugin/gitlab/issues/
 ├── src/test/java/io/kestra/plugin/gitlab/mergerequests/
+├── src/test/java/io/kestra/plugin/gitlab/pipelines/
 ├── build.gradle
 └── README.md
 ```

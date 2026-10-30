@@ -1,0 +1,8 @@
+group: io.kestra.plugin.gitlab.pipelines
+name: "pipelines"
+title: "GitLab Pipelines"
+description: "Tasks that run, read, list, cancel and retry GitLab CI/CD pipelines, and a trigger for finished pipelines."
+body: "Set the GitLab host name, project ID, and access token to start a pipeline and wait for its result, inspect or list pipelines, cancel or retry them, and start a flow when a pipeline succeeds, fails or is canceled."
+videos: []
+createdBy: "Kestra Core Team"
+managedBy: "Kestra Core Team"
